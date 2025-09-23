@@ -35,11 +35,10 @@ for message in st.session_state.messages:
 def search_operations_docs(query, limit=5):
     """Search the operations documents using Cortex Search service"""
     try:
-        # Call the Cortex Search service
+        # Try the first syntax for Cortex Search service
         search_sql = f"""
-        SELECT SNOWFLAKE.CORTEX.SEARCH(
-            'CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.SEARCH_OPERATIONS_DOCS',
-            '{query}',
+        SELECT CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.SEARCH_OPERATIONS_DOCS!SEARCH(
+            '{query.replace("'", "''")}',
             {limit}
         ) as search_results
         """
@@ -53,8 +52,61 @@ def search_operations_docs(query, limit=5):
             return {"results": []}
             
     except Exception as e:
-        st.error(f"Error searching documents: {str(e)}")
-        return {"results": []}
+        # Try alternative syntax if the first one fails
+        try:
+            search_sql_alt = f"""
+            SELECT SYSTEM$CORTEX_SEARCH(
+                'CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.SEARCH_OPERATIONS_DOCS',
+                '{query.replace("'", "''")}',
+                {limit}
+            ) as search_results
+            """
+            
+            result = session.sql(search_sql_alt).collect()
+            
+            if result and len(result) > 0:
+                search_results = json.loads(result[0]['SEARCH_RESULTS'])
+                return search_results
+            else:
+                return {"results": []}
+                
+        except Exception as e2:
+            # If both syntaxes fail, try direct table query as fallback
+            try:
+                fallback_sql = f"""
+                SELECT 
+                    TITLE,
+                    CONTENT,
+                    RELATIVE_PATH,
+                    1.0 as score
+                FROM CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.OPERATIONS_DOCUMENTS
+                WHERE UPPER(CONTENT) LIKE UPPER('%{query.replace("'", "''")}%')
+                   OR UPPER(TITLE) LIKE UPPER('%{query.replace("'", "''")}%')
+                LIMIT {limit}
+                """
+                
+                result = session.sql(fallback_sql).collect()
+                
+                if result and len(result) > 0:
+                    # Format results to match Cortex Search format
+                    formatted_results = {
+                        "results": [
+                            {
+                                "title": row['TITLE'],
+                                "content": row['CONTENT'],
+                                "relative_path": row['RELATIVE_PATH'],
+                                "score": row['SCORE']
+                            }
+                            for row in result
+                        ]
+                    }
+                    return formatted_results
+                else:
+                    return {"results": []}
+                    
+            except Exception as e3:
+                st.error(f"Error searching documents (all methods failed): {str(e)} | {str(e2)} | {str(e3)}")
+                return {"results": []}
 
 # Function to format search results for display
 def format_search_results(search_results):
@@ -113,7 +165,7 @@ RESPONSE:
         complete_sql = f"""
         SELECT SNOWFLAKE.CORTEX.COMPLETE(
             'llama3.1-8b',
-            '{prompt.replace("'", "''")}'
+            $${prompt}$$
         ) as response
         """
         
@@ -190,6 +242,16 @@ with st.sidebar:
     
     st.header("🔧 Search Settings")
     search_limit = st.slider("Number of documents to search", 1, 10, 5)
+    
+    st.header("🔍 Debug Info")
+    if st.button("Test Search Service"):
+        with st.spinner("Testing search service..."):
+            test_results = search_operations_docs("monitoring", 1)
+            if test_results.get("results"):
+                st.success("✅ Search service is working!")
+                st.json(test_results)
+            else:
+                st.error("❌ Search service test failed")
     
     if st.button("Clear Chat History"):
         st.session_state.messages = []
