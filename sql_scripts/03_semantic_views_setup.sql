@@ -88,7 +88,7 @@ CREATE OR REPLACE SEMANTIC VIEW CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.CLINICAL_
 			WITH SYNONYMS = ('total contract value', 'contract revenue', 'study value'),
 		SAFETY_EVENTS.TOTAL_SAFETY_EVENTS as COUNT(*)
 			WITH SYNONYMS = ('safety events', 'adverse events', 'AEs'),
-		SAFETY_EVENTS.SERIOUS_ADVERSE_EVENTS as COUNT_IF(event_type = 'Serious Adverse Event')
+		SAFETY_EVENTS.SERIOUS_ADVERSE_EVENTS as SUM(CASE WHEN event_type = 'Serious Adverse Event' THEN 1 ELSE 0 END)
 			WITH SYNONYMS = ('serious adverse events', 'SAEs', 'serious AEs'),
 		MONITORING.TOTAL_QUERIES as SUM(queries_opened)
 			WITH SYNONYMS = ('total queries', 'data queries', 'query count'),
@@ -148,17 +148,17 @@ CREATE OR REPLACE SEMANTIC VIEW CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.BUSINESS_
 	metrics (
 		SPONSORS.TOTAL_REVENUE as SUM(total_contract_value)
 			WITH SYNONYMS = ('total revenue', 'sponsor revenue', 'contract revenue'),
-		BUSINESS_DEV.OPPORTUNITIES_WON as COUNT_IF(proposal_status = 'Won')
+		BUSINESS_DEV.OPPORTUNITIES_WON as SUM(CASE WHEN proposal_status = 'Won' THEN 1 ELSE 0 END)
 			WITH SYNONYMS = ('opportunities won', 'wins', 'successful proposals'),
-		BUSINESS_DEV.OPPORTUNITIES_LOST as COUNT_IF(proposal_status = 'Lost')
+		BUSINESS_DEV.OPPORTUNITIES_LOST as SUM(CASE WHEN proposal_status = 'Lost' THEN 1 ELSE 0 END)
 			WITH SYNONYMS = ('opportunities lost', 'losses', 'unsuccessful proposals'),
-		BUSINESS_DEV.WIN_RATE as COUNT_IF(proposal_status = 'Won') / COUNT_IF(proposal_status IN ('Won', 'Lost')) * 100
+		BUSINESS_DEV.WIN_RATE as SUM(CASE WHEN proposal_status = 'Won' THEN 1 ELSE 0 END) / SUM(CASE WHEN proposal_status IN ('Won', 'Lost') THEN 1 ELSE 0 END) * 100
 			WITH SYNONYMS = ('win rate', 'success rate', 'proposal success rate'),
-		BUSINESS_DEV.PIPELINE_VALUE as SUM_IF(estimated_value, proposal_status = 'Pending')
+		BUSINESS_DEV.PIPELINE_VALUE as SUM(CASE WHEN proposal_status = 'Pending' THEN estimated_value ELSE 0 END)
 			WITH SYNONYMS = ('pipeline value', 'pending opportunities', 'business pipeline'),
-		FINANCIALS.REVENUE_RECOGNIZED as SUM_IF(actual_amount, payment_status = 'Paid')
+		FINANCIALS.REVENUE_RECOGNIZED as SUM(CASE WHEN payment_status = 'Paid' THEN actual_amount ELSE 0 END)
 			WITH SYNONYMS = ('revenue recognized', 'paid revenue', 'collected revenue'),
-		FINANCIALS.OUTSTANDING_INVOICES as SUM_IF(actual_amount, payment_status IN ('Pending', 'Invoiced'))
+		FINANCIALS.OUTSTANDING_INVOICES as SUM(CASE WHEN payment_status IN ('Pending', 'Invoiced') THEN actual_amount ELSE 0 END)
 			WITH SYNONYMS = ('outstanding invoices', 'pending payments', 'accounts receivable')
 	);
 
