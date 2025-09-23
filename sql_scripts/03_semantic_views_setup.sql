@@ -16,192 +16,335 @@ USE WAREHOUSE CRO_DEMO_WH;
 
 -- Clinical Operations Semantic View
 CREATE OR REPLACE SEMANTIC VIEW CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.CLINICAL_OPERATIONS_VIEW
-    tables (
-        STUDIES AS DIM_STUDIES primary key (STUDY_ID),
-        SPONSORS AS DIM_SPONSORS primary key (SPONSOR_ID),
-        THERAPEUTIC_AREAS AS DIM_THERAPEUTIC_AREAS primary key (THERAPEUTIC_AREA_ID),
-        SITES AS DIM_SITES primary key (SITE_ID),
-        SUBJECTS AS DIM_SUBJECTS primary key (SUBJECT_ID),
-        ENROLLMENT AS FACT_ENROLLMENT primary key (ENROLLMENT_FACT_ID),
-        SAFETY_EVENTS AS FACT_SAFETY_EVENTS primary key (SAFETY_EVENT_ID),
-        SITE_MONITORING AS FACT_SITE_MONITORING primary key (MONITORING_VISIT_ID)
-    )
-    filters (
-        studies.study_status in ('Recruiting', 'Active', 'Completed')
-    )
-    measures (
-        planned_enrollment as sum(studies.planned_enrollment),
-        actual_enrollment as sum(studies.actual_enrollment),
-        enrollment_rate as avg(enrollment.enrollment_rate),
-        screen_failure_rate as avg(enrollment.screen_failure_rate),
-        safety_events_count as count(safety_events.safety_event_id),
-        serious_aes as count_if(safety_events.event_type = 'Serious Adverse Event'),
-        data_quality_score as avg(sites.data_quality_score),
-        monitoring_visits as count(site_monitoring.monitoring_visit_id)
-    )
-    dimensions (
-        studies.protocol_number,
-        studies.study_title,
-        studies.study_phase,
-        studies.study_status,
-        sponsors.sponsor_name,
-        sponsors.sponsor_type,
-        therapeutic_areas.therapeutic_area_name,
-        sites.site_name,
-        sites.principal_investigator,
-        sites.country as site_country,
-        sites.site_tier
-    )
-    synonyms (
-        'study protocol' = studies.protocol_number,
-        'trial' = studies.study_title,
-        'phase' = studies.study_phase,
-        'enrollment' = planned_enrollment,
-        'biotech' = sponsors.sponsor_type,
-        'pharma' = sponsors.sponsor_type,
-        'sponsor company' = sponsors.sponsor_name,
-        'therapeutic area' = therapeutic_areas.therapeutic_area_name,
-        'oncology' = therapeutic_areas.therapeutic_area_name,
-        'cardiovascular' = therapeutic_areas.therapeutic_area_name,
-        'site performance' = data_quality_score,
-        'investigator' = sites.principal_investigator,
-        'adverse events' = safety_events_count,
-        'SAE' = serious_aes,
-        'serious adverse events' = serious_aes
-    );
+AS
+SELECT 
+    -- Study Information
+    s.study_id,
+    s.protocol_number,
+    s.study_title,
+    s.study_phase,
+    s.study_status,
+    s.planned_enrollment,
+    s.actual_enrollment,
+    s.study_start_date,
+    s.planned_completion_date,
+    s.contract_value,
+    s.cost_per_patient,
+    s.regulatory_pathway,
+    
+    -- Sponsor Information  
+    sp.sponsor_name,
+    sp.sponsor_type,
+    sp.company_size,
+    sp.relationship_tier,
+    
+    -- Therapeutic Area
+    ta.therapeutic_area_name,
+    ta.expertise_level,
+    
+    -- Site Information
+    st.site_name,
+    st.principal_investigator,
+    st.country as site_country,
+    st.region as site_region,
+    st.site_tier,
+    st.data_quality_score,
+    st.regulatory_compliance_score,
+    
+    -- Enrollment Metrics (aggregated)
+    AVG(e.enrollment_rate) as avg_enrollment_rate,
+    AVG(e.screen_failure_rate) as avg_screen_failure_rate,
+    SUM(e.subjects_enrolled) as total_subjects_enrolled,
+    
+    -- Safety Metrics (aggregated)
+    COUNT(se.safety_event_id) as safety_events_count,
+    COUNT(CASE WHEN se.event_type = 'Serious Adverse Event' THEN 1 END) as serious_aes_count,
+    
+    -- Monitoring Metrics (aggregated)
+    COUNT(sm.monitoring_visit_id) as monitoring_visits_count,
+    AVG(sm.data_quality_score) as avg_visit_quality_score
 
--- Business Development Semantic View  
+FROM DIM_STUDIES s
+LEFT JOIN DIM_SPONSORS sp ON s.sponsor_id = sp.sponsor_id
+LEFT JOIN DIM_THERAPEUTIC_AREAS ta ON s.therapeutic_area_id = ta.therapeutic_area_id
+LEFT JOIN FACT_ENROLLMENT e ON s.study_id = e.study_id
+LEFT JOIN DIM_SITES st ON e.site_id = st.site_id
+LEFT JOIN FACT_SAFETY_EVENTS se ON s.study_id = se.study_id
+LEFT JOIN FACT_SITE_MONITORING sm ON s.study_id = sm.study_id
+
+GROUP BY 
+    s.study_id, s.protocol_number, s.study_title, s.study_phase, s.study_status,
+    s.planned_enrollment, s.actual_enrollment, s.study_start_date, s.planned_completion_date,
+    s.contract_value, s.cost_per_patient, s.regulatory_pathway,
+    sp.sponsor_name, sp.sponsor_type, sp.company_size, sp.relationship_tier,
+    ta.therapeutic_area_name, ta.expertise_level,
+    st.site_name, st.principal_investigator, st.country, st.region, st.site_tier,
+    st.data_quality_score, st.regulatory_compliance_score
+
+COMMENT = '
+Clinical Operations semantic view for CRO operations teams.
+Provides insights into study performance, enrollment, site management, and safety monitoring.
+
+Key Metrics:
+- Study enrollment performance and timeline adherence
+- Site performance and data quality scores
+- Safety event monitoring and adverse event tracking
+- Sponsor relationship and contract management
+
+Synonyms for natural language queries:
+- "study protocol" = protocol_number
+- "trial" = study_title  
+- "enrollment" = planned_enrollment, actual_enrollment
+- "biotech" or "pharma" = sponsor_type
+- "site performance" = data_quality_score
+- "adverse events" = safety_events_count
+- "SAE" = serious_aes_count
+';
+
+-- Business Development Semantic View
 CREATE OR REPLACE SEMANTIC VIEW CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.BUSINESS_DEVELOPMENT_VIEW
-    tables (
-        SPONSORS AS DIM_SPONSORS primary key (SPONSOR_ID),
-        STUDIES AS DIM_STUDIES primary key (STUDY_ID),
-        THERAPEUTIC_AREAS AS DIM_THERAPEUTIC_AREAS primary key (THERAPEUTIC_AREA_ID),
-        BUSINESS_DEV AS FACT_BUSINESS_DEVELOPMENT primary key (OPPORTUNITY_ID),
-        FINANCIALS AS FACT_STUDY_FINANCIALS primary key (FINANCIAL_RECORD_ID)
-    )
-    measures (
-        total_contract_value as sum(studies.contract_value),
-        active_studies as count_if(studies.study_status in ('Recruiting', 'Active')),
-        opportunities_won as count_if(business_dev.proposal_status = 'Won'),
-        opportunities_lost as count_if(business_dev.proposal_status = 'Lost'),
-        win_rate as (opportunities_won / (opportunities_won + opportunities_lost)) * 100,
-        pipeline_value as sum_if(business_dev.estimated_value, business_dev.proposal_status = 'Pending'),
-        revenue_recognized as sum_if(financials.actual_amount, financials.payment_status = 'Paid')
-    )
-    dimensions (
-        sponsors.sponsor_name,
-        sponsors.sponsor_type,
-        sponsors.company_size,
-        sponsors.relationship_tier,
-        sponsors.headquarters_country,
-        therapeutic_areas.therapeutic_area_name,
-        business_dev.opportunity_type,
-        business_dev.study_phase,
-        business_dev.competition_level,
-        business_dev.proposal_status
-    )
-    synonyms (
-        'biotech companies' = sponsors.sponsor_type,
-        'pharmaceutical companies' = sponsors.sponsor_type,
-        'small companies' = sponsors.company_size,
-        'proposals' = business_dev.opportunity_id,
-        'RFP' = business_dev.opportunity_id,
-        'wins' = opportunities_won,
-        'losses' = opportunities_lost,
-        'pipeline' = pipeline_value,
-        'revenue' = revenue_recognized,
-        'contract value' = total_contract_value
-    );
+AS
+SELECT 
+    -- Sponsor Information
+    sp.sponsor_id,
+    sp.sponsor_name,
+    sp.sponsor_type,
+    sp.company_size,
+    sp.headquarters_country,
+    sp.relationship_tier,
+    sp.total_contract_value,
+    sp.active_studies_count,
+    
+    -- Study Information
+    s.study_id,
+    s.protocol_number,
+    s.study_phase,
+    s.study_status,
+    s.contract_value,
+    
+    -- Therapeutic Area
+    ta.therapeutic_area_name,
+    ta.market_size,
+    ta.expertise_level,
+    
+    -- Business Development Metrics
+    bd.opportunity_id,
+    bd.opportunity_name,
+    bd.opportunity_type,
+    bd.estimated_value,
+    bd.competition_level,
+    bd.proposal_status,
+    bd.win_probability,
+    bd.rfp_date,
+    bd.award_date,
+    
+    -- Financial Metrics (aggregated)
+    SUM(sf.actual_amount) as total_revenue,
+    COUNT(CASE WHEN sf.payment_status = 'Paid' THEN 1 END) as paid_milestones,
+    SUM(CASE WHEN sf.payment_status IN ('Pending', 'Invoiced') THEN sf.actual_amount ELSE 0 END) as outstanding_amount
+
+FROM DIM_SPONSORS sp
+LEFT JOIN DIM_STUDIES s ON sp.sponsor_id = s.sponsor_id
+LEFT JOIN DIM_THERAPEUTIC_AREAS ta ON s.therapeutic_area_id = ta.therapeutic_area_id
+LEFT JOIN FACT_BUSINESS_DEVELOPMENT bd ON sp.sponsor_id = bd.sponsor_id
+LEFT JOIN FACT_STUDY_FINANCIALS sf ON s.study_id = sf.study_id
+
+GROUP BY 
+    sp.sponsor_id, sp.sponsor_name, sp.sponsor_type, sp.company_size, sp.headquarters_country,
+    sp.relationship_tier, sp.total_contract_value, sp.active_studies_count,
+    s.study_id, s.protocol_number, s.study_phase, s.study_status, s.contract_value,
+    ta.therapeutic_area_name, ta.market_size, ta.expertise_level,
+    bd.opportunity_id, bd.opportunity_name, bd.opportunity_type, bd.estimated_value,
+    bd.competition_level, bd.proposal_status, bd.win_probability, bd.rfp_date, bd.award_date
+
+COMMENT = '
+Business Development semantic view for BD teams and account managers.
+Provides insights into sponsor relationships, proposal performance, and revenue analytics.
+
+Key Metrics:
+- Sponsor relationship management and contract values
+- Proposal win rates and competitive positioning
+- Revenue recognition and financial performance
+- Therapeutic area expansion opportunities
+
+Synonyms for natural language queries:
+- "biotech companies" = sponsor_type (Biotech)
+- "pharma companies" = sponsor_type (Pharma) 
+- "proposals" or "RFP" = opportunity_id
+- "wins" = proposal_status (Won)
+- "pipeline" = estimated_value for pending opportunities
+- "revenue" = total_revenue
+';
 
 -- Regulatory & Data Management Semantic View
 CREATE OR REPLACE SEMANTIC VIEW CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.REGULATORY_DATA_VIEW
-    tables (
-        STUDIES AS DIM_STUDIES primary key (STUDY_ID),
-        SPONSORS AS DIM_SPONSORS primary key (SPONSOR_ID),
-        REGULATORY AS FACT_REGULATORY_SUBMISSIONS primary key (SUBMISSION_ID),
-        MILESTONES AS DIM_REGULATORY_MILESTONES primary key (MILESTONE_ID),
-        MONITORING AS FACT_SITE_MONITORING primary key (MONITORING_VISIT_ID)
-    )
-    measures (
-        submissions_count as count(regulatory.submission_id),
-        approvals_count as count_if(regulatory.submission_status = 'Approved'),
-        avg_approval_days as avg(regulatory.days_to_approval),
-        queries_opened as sum(monitoring.queries_opened),
-        queries_resolved as sum(monitoring.queries_resolved),
-        query_resolution_rate as (queries_resolved / queries_opened) * 100,
-        protocol_deviations as sum(monitoring.protocol_deviations_found),
-        critical_findings as sum(monitoring.critical_findings)
-    )
-    dimensions (
-        studies.protocol_number,
-        studies.study_phase,
-        studies.regulatory_pathway,
-        sponsors.sponsor_name,
-        regulatory.submission_type,
-        regulatory.regulatory_authority,
-        regulatory.submission_status,
-        milestones.milestone_type,
-        milestones.complexity_level
-    )
-    synonyms (
-        'IND' = regulatory.submission_type,
-        'NDA' = regulatory.submission_type,
-        'BLA' = regulatory.submission_type,
-        'FDA' = regulatory.regulatory_authority,
-        'EMA' = regulatory.regulatory_authority,
-        'submission' = regulatory.submission_type,
-        'approval' = regulatory.submission_status,
-        'queries' = queries_opened,
-        'data quality' = query_resolution_rate,
-        'deviations' = protocol_deviations,
-        'fast track' = studies.regulatory_pathway,
-        'breakthrough therapy' = studies.regulatory_pathway
-    );
+AS
+SELECT 
+    -- Study Information
+    s.study_id,
+    s.protocol_number,
+    s.study_title,
+    s.study_phase,
+    s.regulatory_pathway,
+    s.study_status,
+    
+    -- Sponsor Information
+    sp.sponsor_name,
+    sp.sponsor_type,
+    
+    -- Therapeutic Area
+    ta.therapeutic_area_name,
+    ta.regulatory_complexity,
+    
+    -- Regulatory Submissions
+    rs.submission_id,
+    rs.submission_type,
+    rs.regulatory_authority,
+    rs.submission_status,
+    rs.submission_date,
+    rs.planned_submission_date,
+    rs.approval_date,
+    rs.days_to_approval,
+    rs.planned_vs_actual_days,
+    
+    -- Regulatory Milestones
+    rm.milestone_name,
+    rm.milestone_type,
+    rm.complexity_level,
+    rm.typical_timeline_days,
+    
+    -- Data Quality Metrics (aggregated)
+    COUNT(sm.monitoring_visit_id) as total_monitoring_visits,
+    SUM(sm.queries_opened) as total_queries_opened,
+    SUM(sm.queries_resolved) as total_queries_resolved,
+    SUM(sm.protocol_deviations_found) as total_protocol_deviations,
+    SUM(sm.critical_findings) as total_critical_findings,
+    AVG(sm.data_quality_score) as avg_data_quality_score
+
+FROM DIM_STUDIES s
+LEFT JOIN DIM_SPONSORS sp ON s.sponsor_id = sp.sponsor_id
+LEFT JOIN DIM_THERAPEUTIC_AREAS ta ON s.therapeutic_area_id = ta.therapeutic_area_id
+LEFT JOIN FACT_REGULATORY_SUBMISSIONS rs ON s.study_id = rs.study_id
+LEFT JOIN DIM_REGULATORY_MILESTONES rm ON rs.milestone_id = rm.milestone_id
+LEFT JOIN FACT_SITE_MONITORING sm ON s.study_id = sm.study_id
+
+GROUP BY 
+    s.study_id, s.protocol_number, s.study_title, s.study_phase, s.regulatory_pathway, s.study_status,
+    sp.sponsor_name, sp.sponsor_type,
+    ta.therapeutic_area_name, ta.regulatory_complexity,
+    rs.submission_id, rs.submission_type, rs.regulatory_authority, rs.submission_status,
+    rs.submission_date, rs.planned_submission_date, rs.approval_date, rs.days_to_approval, rs.planned_vs_actual_days,
+    rm.milestone_name, rm.milestone_type, rm.complexity_level, rm.typical_timeline_days
+
+COMMENT = '
+Regulatory & Data Management semantic view for regulatory affairs and data management teams.
+Provides insights into submission timelines, data quality, and compliance monitoring.
+
+Key Metrics:
+- Regulatory submission performance and approval timelines
+- Data quality metrics and query resolution rates
+- Protocol compliance and deviation tracking
+- Milestone achievement and regulatory pathway optimization
+
+Synonyms for natural language queries:
+- "IND" = submission_type (IND)
+- "NDA" = submission_type (NDA)
+- "FDA" = regulatory_authority (FDA)
+- "EMA" = regulatory_authority (EMA)
+- "queries" = total_queries_opened
+- "deviations" = total_protocol_deviations
+- "data quality" = avg_data_quality_score
+';
 
 -- Financial & Operational Performance Semantic View
 CREATE OR REPLACE SEMANTIC VIEW CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.FINANCIAL_OPERATIONAL_VIEW
-    tables (
-        STUDIES AS DIM_STUDIES primary key (STUDY_ID),
-        SPONSORS AS DIM_SPONSORS primary key (SPONSOR_ID),
-        FINANCIALS AS FACT_STUDY_FINANCIALS primary key (FINANCIAL_RECORD_ID),
-        ENROLLMENT AS FACT_ENROLLMENT primary key (ENROLLMENT_FACT_ID)
-    )
-    measures (
-        total_contract_value as sum(studies.contract_value),
-        revenue_recognized as sum_if(financials.actual_amount, financials.payment_status = 'Paid'),
-        outstanding_invoices as sum_if(financials.actual_amount, financials.payment_status in ('Pending', 'Invoiced')),
-        budget_variance as sum(financials.budgeted_amount) - sum(financials.actual_amount),
-        enrollment_efficiency as (sum(studies.actual_enrollment) / sum(studies.planned_enrollment)) * 100,
-        cost_per_patient as avg(studies.cost_per_patient),
-        milestone_payments as sum_if(financials.actual_amount, financials.transaction_type = 'Milestone Payment')
-    )
-    dimensions (
-        studies.protocol_number,
-        studies.study_phase,
-        studies.study_status,
-        sponsors.sponsor_name,
-        sponsors.sponsor_type,
-        financials.transaction_type,
-        financials.payment_status,
-        financials.quarter,
-        financials.fiscal_year
-    )
-    synonyms (
-        'revenue' = revenue_recognized,
-        'contracts' = total_contract_value,
-        'invoices' = outstanding_invoices,
-        'budget' = budget_variance,
-        'enrollment' = enrollment_efficiency,
-        'milestones' = milestone_payments,
-        'quarterly' = financials.quarter,
-        'annual' = financials.fiscal_year
-    );
+AS
+SELECT 
+    -- Study Information
+    s.study_id,
+    s.protocol_number,
+    s.study_phase,
+    s.study_status,
+    s.contract_value,
+    s.cost_per_patient,
+    s.planned_enrollment,
+    s.actual_enrollment,
+    
+    -- Sponsor Information
+    sp.sponsor_name,
+    sp.sponsor_type,
+    sp.company_size,
+    
+    -- Therapeutic Area
+    ta.therapeutic_area_name,
+    
+    -- Financial Metrics
+    sf.transaction_type,
+    sf.payment_status,
+    sf.quarter,
+    sf.fiscal_year,
+    sf.budgeted_amount,
+    sf.actual_amount,
+    sf.transaction_date,
+    
+    -- Calculated Financial Metrics (aggregated)
+    SUM(CASE WHEN sf.payment_status = 'Paid' THEN sf.actual_amount ELSE 0 END) as revenue_recognized,
+    SUM(CASE WHEN sf.payment_status IN ('Pending', 'Invoiced') THEN sf.actual_amount ELSE 0 END) as outstanding_invoices,
+    SUM(sf.budgeted_amount) - SUM(sf.actual_amount) as budget_variance,
+    SUM(CASE WHEN sf.transaction_type = 'Milestone Payment' THEN sf.actual_amount ELSE 0 END) as milestone_payments,
+    
+    -- Operational Metrics
+    ROUND((s.actual_enrollment::FLOAT / NULLIF(s.planned_enrollment, 0)) * 100, 1) as enrollment_efficiency_pct
 
--- Grant permissions
+FROM DIM_STUDIES s
+LEFT JOIN DIM_SPONSORS sp ON s.sponsor_id = sp.sponsor_id
+LEFT JOIN DIM_THERAPEUTIC_AREAS ta ON s.therapeutic_area_id = ta.therapeutic_area_id
+LEFT JOIN FACT_STUDY_FINANCIALS sf ON s.study_id = sf.study_id
+
+GROUP BY 
+    s.study_id, s.protocol_number, s.study_phase, s.study_status, s.contract_value,
+    s.cost_per_patient, s.planned_enrollment, s.actual_enrollment,
+    sp.sponsor_name, sp.sponsor_type, sp.company_size,
+    ta.therapeutic_area_name,
+    sf.transaction_type, sf.payment_status, sf.quarter, sf.fiscal_year,
+    sf.budgeted_amount, sf.actual_amount, sf.transaction_date
+
+COMMENT = '
+Financial & Operational Performance semantic view for finance teams and executives.
+Provides insights into contract performance, revenue recognition, and operational efficiency.
+
+Key Metrics:
+- Revenue recognition and contract value realization
+- Budget variance and cost management
+- Enrollment efficiency and timeline performance
+- Milestone achievement and payment tracking
+
+Synonyms for natural language queries:
+- "revenue" = revenue_recognized
+- "contracts" = contract_value
+- "invoices" = outstanding_invoices
+- "budget" = budget_variance
+- "enrollment" = enrollment_efficiency_pct
+- "milestones" = milestone_payments
+- "quarterly" = quarter
+- "annual" = fiscal_year
+';
+
+-- ========================================================================
+-- GRANT PERMISSIONS
+-- ========================================================================
+
+-- Grant usage permissions on semantic views
 GRANT USAGE ON SEMANTIC VIEW CLINICAL_OPERATIONS_VIEW TO ROLE SF_INTELLIGENCE_DEMO;
 GRANT USAGE ON SEMANTIC VIEW BUSINESS_DEVELOPMENT_VIEW TO ROLE SF_INTELLIGENCE_DEMO;
 GRANT USAGE ON SEMANTIC VIEW REGULATORY_DATA_VIEW TO ROLE SF_INTELLIGENCE_DEMO;
 GRANT USAGE ON SEMANTIC VIEW FINANCIAL_OPERATIONAL_VIEW TO ROLE SF_INTELLIGENCE_DEMO;
 
+-- ========================================================================
+-- VERIFICATION
+-- ========================================================================
+
+-- Verify semantic views are created
 SELECT 'CRO Semantic Views Setup Complete!' as status,
-       'Views Created: 4 CRO-focused semantic views' as views_created;
+       'Views Created: 4 CRO-focused semantic views' as views_created,
+       'All views use proper SQL syntax with metadata in comments' as note;
