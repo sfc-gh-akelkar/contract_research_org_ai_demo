@@ -82,7 +82,7 @@ CREATE OR REPLACE SEMANTIC VIEW CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.CLINICAL_
 	metrics (
 		STUDIES.TOTAL_ENROLLMENT as SUM(actual_enrollment)
 			WITH SYNONYMS = ('total enrollment', 'total subjects', 'enrolled patients'),
-		STUDIES.ENROLLMENT_RATE as AVG(enrollment_rate)
+		ENROLLMENT.AVG_ENROLLMENT_RATE as AVG(enrollment_rate)
 			WITH SYNONYMS = ('enrollment rate', 'recruitment rate', 'accrual rate'),
 		STUDIES.TOTAL_CONTRACT_VALUE as SUM(contract_value)
 			WITH SYNONYMS = ('total contract value', 'contract revenue', 'study value'),
