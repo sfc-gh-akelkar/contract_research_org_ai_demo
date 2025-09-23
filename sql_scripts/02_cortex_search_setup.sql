@@ -1,33 +1,56 @@
 -- ========================================================================
--- Healthcare Demo - Step 2: Cortex Search Components Setup  
+-- CRO Demo - Step 2: Cortex Search Components Setup  
 -- Creates document parsing and search services for unstructured data
--- Prerequisites: Run 01_healthcare_data_setup.sql first
+-- Prerequisites: Run 01_cro_data_setup.sql first
 -- ========================================================================
 
--- Switch to the healthcare demo role and database
+-- Switch to the CRO demo role and database
 USE ROLE SF_INTELLIGENCE_DEMO;
 USE DATABASE CRO_AI_DEMO;
 USE SCHEMA CLINICAL_OPERATIONS_SCHEMA;
 USE WAREHOUSE CRO_DEMO_WH;
 
 -- ========================================================================
--- CORTEX SEARCH SERVICES FOR HEALTHCARE DOCUMENTS
+-- CORTEX SEARCH SERVICES FOR CRO DOCUMENTS
 -- ========================================================================
 
--- Create table for healthcare documents with embedded content
-CREATE OR REPLACE TABLE healthcare_documents (
+-- Create table for regulatory documents with embedded content
+CREATE OR REPLACE TABLE REGULATORY_DOCUMENTS (
     document_id VARCHAR(100) PRIMARY KEY,
     relative_path VARCHAR(500),
     title VARCHAR(200),
     category VARCHAR(50),
+    document_type VARCHAR(100),
     content TEXT,
-    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+    upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
 );
 
--- Create search service for clinical documents
-CREATE OR REPLACE CORTEX SEARCH SERVICE SEARCH_CLINICAL_DOCS
+-- Create table for operations documents with embedded content
+CREATE OR REPLACE TABLE OPERATIONS_DOCUMENTS (
+    document_id VARCHAR(100) PRIMARY KEY,
+    relative_path VARCHAR(500),
+    title VARCHAR(200),
+    category VARCHAR(50),
+    document_type VARCHAR(100),
+    content TEXT,
+    upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+);
+
+-- Create table for business documents with embedded content
+CREATE OR REPLACE TABLE BUSINESS_DOCUMENTS (
+    document_id VARCHAR(100) PRIMARY KEY,
+    relative_path VARCHAR(500),
+    title VARCHAR(200),
+    category VARCHAR(50),
+    document_type VARCHAR(100),
+    content TEXT,
+    upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+);
+
+-- Create search service for regulatory documents
+CREATE OR REPLACE CORTEX SEARCH SERVICE SEARCH_REGULATORY_DOCS
     ON content
-    ATTRIBUTES document_id, relative_path, title, category
+    ATTRIBUTES document_id, relative_path, title, category, document_type
     WAREHOUSE = CRO_DEMO_WH
     TARGET_LAG = '1 day'
     EMBEDDING_MODEL = 'snowflake-arctic-embed-l-v2.0'
@@ -37,15 +60,15 @@ CREATE OR REPLACE CORTEX SEARCH SERVICE SEARCH_CLINICAL_DOCS
             relative_path,
             title,
             category,
+            document_type,
             content
-        FROM healthcare_documents
-        WHERE category = 'clinical'
+        FROM REGULATORY_DOCUMENTS
     );
 
 -- Create search service for operational documents
 CREATE OR REPLACE CORTEX SEARCH SERVICE SEARCH_OPERATIONS_DOCS
     ON content
-    ATTRIBUTES document_id, relative_path, title, category
+    ATTRIBUTES document_id, relative_path, title, category, document_type
     WAREHOUSE = CRO_DEMO_WH
     TARGET_LAG = '1 day'
     EMBEDDING_MODEL = 'snowflake-arctic-embed-l-v2.0'
@@ -55,15 +78,15 @@ CREATE OR REPLACE CORTEX SEARCH SERVICE SEARCH_OPERATIONS_DOCS
             relative_path,
             title,
             category,
+            document_type,
             content
-        FROM healthcare_documents
-        WHERE category = 'operations'
+        FROM OPERATIONS_DOCUMENTS
     );
 
--- Create search service for research documents
-CREATE OR REPLACE CORTEX SEARCH SERVICE SEARCH_RESEARCH_DOCS
+-- Create search service for business documents
+CREATE OR REPLACE CORTEX SEARCH SERVICE SEARCH_BUSINESS_DOCS
     ON content
-    ATTRIBUTES document_id, relative_path, title, category
+    ATTRIBUTES document_id, relative_path, title, category, document_type
     WAREHOUSE = CRO_DEMO_WH
     TARGET_LAG = '1 day'
     EMBEDDING_MODEL = 'snowflake-arctic-embed-l-v2.0'
@@ -73,129 +96,91 @@ CREATE OR REPLACE CORTEX SEARCH SERVICE SEARCH_RESEARCH_DOCS
             relative_path,
             title,
             category,
+            document_type,
             content
-        FROM healthcare_documents
-        WHERE category = 'research'
+        FROM BUSINESS_DOCUMENTS
     );
 
 -- ========================================================================
 -- VERIFICATION
 -- ========================================================================
 
--- Show all Cortex Search services
-SHOW CORTEX SEARCH SERVICES;
-
--- Verify healthcare documents loaded
+-- Verify CRO document tables created
 SELECT 
-    'Healthcare Documents' as component,
-    COUNT(*) as total_documents,
-    LISTAGG(DISTINCT category, ', ') as categories
-FROM healthcare_documents;
+    'CRO Document Tables' as component,
+    'REGULATORY_DOCUMENTS, OPERATIONS_DOCUMENTS, BUSINESS_DOCUMENTS' as tables_created,
+    'Ready for document loading' as status;
 
--- Show documents by category
+-- Count documents in each table (will be 0 until 02a script is run)
+SELECT 'Document Count Check' as check_type;
+SELECT 'REGULATORY_DOCUMENTS' as table_name, COUNT(*) as document_count 
+FROM REGULATORY_DOCUMENTS
+UNION ALL
+SELECT 'OPERATIONS_DOCUMENTS' as table_name, COUNT(*) as document_count 
+FROM OPERATIONS_DOCUMENTS
+UNION ALL
+SELECT 'BUSINESS_DOCUMENTS' as table_name, COUNT(*) as document_count 
+FROM BUSINESS_DOCUMENTS
+ORDER BY table_name;
+
+-- Test search services (will work after documents are loaded)
+SELECT 'Search Services Test' as test_type;
+
+-- Test regulatory documents search (example query)
 SELECT 
-    category,
-    COUNT(*) as document_count,
-    LISTAGG(title, ', ') as document_titles
-FROM healthcare_documents 
-GROUP BY category
-ORDER BY category;
+    'ICH GCP guidelines clinical trial monitoring' as test_query,
+    'SEARCH_REGULATORY_DOCS' as search_service,
+    'Ready for testing after document load' as status;
 
--- Test search services with embedded documents
--- Uncomment these queries to test your search services:
-
-/*
--- Test clinical documents search
+-- Test operations documents search (example query)
 SELECT 
-    document_id,
-    title,
-    category,
-    relative_path
-FROM TABLE(
-    SEARCH_CLINICAL_DOCS(
-        'ICH GCP guidelines clinical trial monitoring',
-        {'limit': 3}
-    )
-);
+    'site management monitoring procedures' as test_query,
+    'SEARCH_OPERATIONS_DOCS' as search_service,
+    'Ready for testing after document load' as status;
 
--- Test operations documents search  
+-- Test business documents search (example query)
 SELECT 
-    document_id,
-    title,
-    category,
-    relative_path
-FROM TABLE(
-    SEARCH_OPERATIONS_DOCS(
-        'HIPAA compliance policy training',
-        {'limit': 3}
-    )
-);
-
--- Test research documents search
-SELECT 
-    document_id,
-    title,
-    category,
-    relative_path
-FROM TABLE(
-    SEARCH_RESEARCH_DOCS(
-        'population health chronic disease management',
-        {'limit': 3}
-    )
-);
-*/
+    'therapeutic area expertise oncology' as test_query,
+    'SEARCH_BUSINESS_DOCS' as search_service,
+    'Ready for testing after document load' as status;
 
 -- ========================================================================
--- COMPLETION MESSAGE
+-- SETUP COMPLETION MESSAGE
 -- ========================================================================
 
-SELECT '✅ Step 2 Complete: Cortex Search services created successfully!' as status;
-SELECT 'Next: Run 02a_healthcare_documents_data.sql to load sample documents' as next_step;
-SELECT 'Then: Run 03_semantic_views_setup.sql' as final_step;
+SELECT '✅ Step 2 Complete: Cortex Search services and document tables created!' as status;
+SELECT 'Next: Run 02a_cro_documents_data.sql to load CRO documents' as next_step;
 
 -- ========================================================================
--- SIMPLIFIED DOCUMENT APPROACH
+-- NOTES FOR DEMO
 -- ========================================================================
 
 /*
-📋 SIMPLIFIED CORTEX SEARCH SETUP:
+🔍 **CORTEX SEARCH SETUP COMPLETE**
 
-This approach uses embedded document content directly in tables instead of 
-file uploads, making the demo completely self-contained:
+**What was created:**
+• REGULATORY_DOCUMENTS table for ICH-GCP guidelines and regulatory content
+• OPERATIONS_DOCUMENTS table for site management SOPs and operational procedures  
+• BUSINESS_DOCUMENTS table for therapeutic area expertise and competitive analysis
+• 3 Cortex Search services for intelligent document retrieval
 
-✅ BENEFITS:
-• No file upload requirements - documents embedded in SQL
-• Immediate availability - no stage setup needed
-• Self-contained demo - all content included
-• Easier to run and demonstrate
-• Version controlled document content
+**Next Steps:**
+1. Run 02a_cro_documents_data.sql to load sample documents
+2. Test search services with natural language queries
+3. Integrate with semantic views for comprehensive analytics
 
-📊 DOCUMENT STRUCTURE:
-• healthcare_documents table with embedded content
-• 6 sample documents across 3 categories:
-  - Clinical: Asthma care protocol, Emergency guidelines
-  - Operations: HIPAA policy, Quality improvement procedures  
-  - Research: Population health study, Clinical trial protocol
+**Search Service Usage:**
+After loading documents, you can search using functions like:
+- SEARCH_REGULATORY_DOCS('ICH GCP guidelines')
+- SEARCH_OPERATIONS_DOCS('site monitoring procedures')  
+- SEARCH_BUSINESS_DOCS('oncology expertise competitive analysis')
 
-🔍 SEARCH SERVICES:
-• SEARCH_CLINICAL_DOCS - Clinical protocols and care guidelines
-• SEARCH_OPERATIONS_DOCS - HIPAA policies and operational procedures
-• SEARCH_RESEARCH_DOCS - Research studies and trial documentation
+The search services will automatically index new documents added to the
+REGULATORY_DOCUMENTS, OPERATIONS_DOCUMENTS, and BUSINESS_DOCUMENTS tables.
 
-📋 NEXT STEPS:
-1. Run 02a_healthcare_documents_data.sql to load sample documents
-2. Run 03_semantic_views_setup.sql to create semantic views
-3. Run 04_agent_setup.sql to configure the AI agent
-4. Test search services with provided example queries
-
-💡 ADDING MORE DOCUMENTS:
-To add additional documents, simply INSERT more rows into the 
-healthcare_documents table with appropriate category and content.
-
-Example:
-INSERT INTO healthcare_documents VALUES
-('CLINICAL_003', 'path/to/new_protocol.md', 'New Clinical Protocol', 'clinical',
-'Document content here...', CURRENT_TIMESTAMP());
-
-Then refresh the search services to index new content.
+**Key Benefits:**
+✅ Intelligent semantic search across CRO documents
+✅ Multi-modal AI combining structured data + document intelligence
+✅ Natural language queries for regulatory, operational, and business content
+✅ Automated indexing and embedding generation
 */
