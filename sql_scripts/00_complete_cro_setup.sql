@@ -42,6 +42,9 @@ Run only the scripts you need for your specific demo requirements.
 -- Step 2: Cortex Search Services
 !source 02_cortex_search_setup.sql;
 
+-- Step 2a: Load Document Data
+!source 02a_cro_documents_data.sql;
+
 -- Step 3: Semantic Views
 !source 03_semantic_views_setup.sql;
 
@@ -66,6 +69,11 @@ SELECT
     '2️⃣',
     'Run 02_cortex_search_setup.sql',
     'Sets up document search tables and services'
+UNION ALL
+SELECT 
+    '2️⃣ᵇ',
+    'Run 02a_cro_documents_data.sql',
+    'Loads CRO documents into Snowflake tables for search'
 UNION ALL
 SELECT 
     '3️⃣',
