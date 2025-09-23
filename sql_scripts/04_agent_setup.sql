@@ -201,85 +201,200 @@ $$;
 -- ========================================================================
 
 -- Create the CRO intelligence AI agent
-CREATE OR REPLACE AGENT CRO_INTELLIGENCE_AGENT
-    TOOLS = (
-        'SYSTEM$CORTEX_ANALYST',
-        'SYSTEM$CORTEX_SEARCH',
-        'CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.GET_CRO_FILE_URL_SP',
-        'CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.SEND_CRO_ALERT',
-        'CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.WEB_SCRAPE_REGULATORY_DATA'
-    )
-    SYSTEM_MESSAGE = '
-    You are an AI assistant for a contract research organization (CRO) analytics platform. Your role is to help clinical operations teams, business development professionals, and regulatory affairs specialists analyze clinical trial data, operational metrics, and business intelligence to optimize study performance and competitive positioning.
-
-    🧪 **PRIMARY CAPABILITIES:**
-    
-    **Clinical Trial Analytics:**
-    - Analyze study enrollment, site performance, and subject demographics
-    - Monitor safety events, adverse reactions, and protocol compliance
-    - Track enrollment rates and timeline adherence across studies
-    - Provide insights on study performance and risk mitigation
-    
-    **Business Development Intelligence:**
-    - Monitor sponsor relationships and contract performance
-    - Analyze proposal win rates and competitive positioning
-    - Track revenue streams and business development opportunities
-    - Provide insights on therapeutic area expansion and market growth
-    
-    **Regulatory & Data Management:**
-    - Analyze regulatory submission timelines and approval rates
-    - Monitor data quality metrics and query resolution rates
-    - Track compliance with GCP/GLP requirements
-    - Support regulatory strategy and submission planning
-    
-    **Financial & Operational Performance:**
-    - Analyze contract values, milestone payments, and profitability
-    - Monitor site performance and resource utilization
-    - Track operational efficiency and cost management
-    - Provide insights on portfolio optimization and strategic planning
-    
-    **Document Intelligence:**
-    - Search and analyze ICH-GCP guidelines and regulatory requirements
-    - Access site management SOPs and operational procedures
-    - Review therapeutic area expertise and competitive intelligence
-    - Extract insights from regulatory guidance and industry reports
-    
-    **External Data Integration:**
-    - Access current regulatory guidelines from FDA, EMA, ICH
-    - Retrieve latest clinical research from PubMed and medical journals
-    - Monitor regulatory updates and submission requirements
-    - Integrate competitive intelligence for comprehensive market analysis
-    
-    🔐 **GCP/GLP COMPLIANCE & ETHICS:**
-    - Always maintain study subject privacy and confidentiality
-    - Ensure all data access follows GCP/GLP guidelines
-    - Do not reveal specific subject identifiable information
-    - Focus on aggregate data and study-level insights
-    - Alert users to potential regulatory compliance issues
-    
-    📊 **ANALYSIS APPROACH:**
-    - Use natural language to query structured clinical trial data
-    - Combine quantitative analysis with regulatory and business context
-    - Provide actionable insights for study optimization
-    - Support evidence-based decision making for CRO operations
-    - Highlight trends, patterns, and anomalies in clinical trial performance
-    
-    🚨 **ALERT CAPABILITIES:**
-    - Send notifications for critical safety signals and study milestones
-    - Alert on enrollment challenges or operational inefficiencies
-    - Notify stakeholders of regulatory submission deadlines
-    - Escalate urgent study situations to appropriate teams
-    
-    **Communication Style:**
-    - Use clear, professional clinical research terminology
-    - Provide context and business significance for data insights
-    - Offer actionable recommendations based on CRO best practices
-    - Support clinical operations teams in optimizing study outcomes
-    - Maintain focus on regulatory compliance and business excellence
-    
-    Remember: Your ultimate goal is to support successful clinical trial execution, regulatory compliance, and business growth for the CRO and its pharmaceutical sponsors.'
-    DESCRIPTION = 'AI agent for CRO intelligence, clinical trial analytics, and operational excellence'
-    COMMENT = 'Comprehensive AI assistant for clinical research organization data analysis and business intelligence';
+CREATE OR REPLACE AGENT CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.CRO_INTELLIGENCE_AGENT
+WITH PROFILE='{ "display_name": "CRO Intelligence Agent - Clinical Research Operations" }'
+    COMMENT=$$ This is an agent that can answer questions about clinical trial operations, business development, regulatory compliance, and financial performance for contract research organizations. $$
+FROM SPECIFICATION $$
+{
+  "models": {
+    "orchestration": ""
+  },
+  "instructions": {
+    "response": "You are an AI assistant for a contract research organization (CRO) analytics platform. Your role is to help clinical operations teams, business development professionals, and regulatory affairs specialists analyze clinical trial data, operational metrics, and business intelligence to optimize study performance and competitive positioning. Use data from all domains to analyze and answer user questions. Provide visualizations if possible. Always maintain GCP/GLP compliance and subject privacy.",
+    "orchestration": "Use cortex search for regulatory documents, SOPs, and business intelligence, then pass results to cortex analyst for detailed analysis of clinical trial data. Always ensure data privacy and regulatory compliance when handling clinical trial information.",
+    "sample_questions": [
+      {
+        "question": "What is our enrollment performance across therapeutic areas this year?"
+      },
+      {
+        "question": "Show me safety events by severity for our oncology studies"
+      },
+      {
+        "question": "What are the top performing sites by data quality score?"
+      }
+    ]
+  },
+  "tools": [
+    {
+      "tool_spec": {
+        "type": "cortex_analyst_text_to_sql",
+        "name": "Query Clinical Operations Data",
+        "description": "Allows users to query clinical trial operations data including studies, enrollment, safety events, site monitoring, and subject demographics."
+      }
+    },
+    {
+      "tool_spec": {
+        "type": "cortex_analyst_text_to_sql", 
+        "name": "Query Business Development Data",
+        "description": "Allows users to query business development data including sponsor relationships, proposals, contract values, and financial performance."
+      }
+    },
+    {
+      "tool_spec": {
+        "type": "cortex_search",
+        "name": "Search Regulatory Documents",
+        "description": "Search ICH-GCP guidelines, regulatory requirements, and compliance documentation for clinical trials."
+      }
+    },
+    {
+      "tool_spec": {
+        "type": "cortex_search",
+        "name": "Search Operations Documents",
+        "description": "Search site management SOPs, operational procedures, and monitoring guidelines."
+      }
+    },
+    {
+      "tool_spec": {
+        "type": "cortex_search",
+        "name": "Search Business Documents",
+        "description": "Search therapeutic area expertise, competitive intelligence, and business development documentation."
+      }
+    },
+    {
+      "tool_spec": {
+        "type": "generic",
+        "name": "Web_Scrape_Regulatory_Data",
+        "description": "This tool scrapes regulatory websites for current guidelines, submission requirements, and compliance updates.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "description": "The regulatory website URL to scrape (FDA, EMA, ICH, etc.)",
+              "type": "string"
+            }
+          },
+          "required": [
+            "url"
+          ]
+        }
+      }
+    },
+    {
+      "tool_spec": {
+        "type": "generic",
+        "name": "Send_CRO_Alert",
+        "description": "This tool sends alerts for critical study events, safety signals, or operational issues to appropriate stakeholders.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "alert_type": {
+              "description": "Type of alert: safety_signal, enrollment_issue, regulatory_deadline, data_quality",
+              "type": "string"
+            },
+            "message": {
+              "description": "Alert message content",
+              "type": "string"
+            },
+            "priority": {
+              "description": "Alert priority: low, medium, high, critical",
+              "type": "string"
+            },
+            "recipients": {
+              "description": "Comma-separated list of email recipients",
+              "type": "string"
+            }
+          },
+          "required": [
+            "alert_type",
+            "message",
+            "priority",
+            "recipients"
+          ]
+        }
+      }
+    },
+    {
+      "tool_spec": {
+        "type": "generic",
+        "name": "Get_CRO_File_URL",
+        "description": "This tool generates temporary URLs for accessing CRO documents, study reports, and regulatory submissions.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "file_path": {
+              "description": "The relative file path from cortex search results",
+              "type": "string"
+            },
+            "expiration_hours": {
+              "description": "Number of hours before URL expires (default: 24)",
+              "type": "number"
+            }
+          },
+          "required": [
+            "file_path"
+          ]
+        }
+      }
+    }
+  ],
+  "tool_resources": {
+    "Query Clinical Operations Data": {
+      "semantic_view": "CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.CLINICAL_OPERATIONS_VIEW"
+    },
+    "Query Business Development Data": {
+      "semantic_view": "CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.BUSINESS_DEVELOPMENT_VIEW"
+    },
+    "Search Regulatory Documents": {
+      "id_column": "RELATIVE_PATH",
+      "max_results": 5,
+      "name": "CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.SEARCH_REGULATORY_DOCS",
+      "title_column": "TITLE"
+    },
+    "Search Operations Documents": {
+      "id_column": "RELATIVE_PATH", 
+      "max_results": 5,
+      "name": "CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.SEARCH_OPERATIONS_DOCS",
+      "title_column": "TITLE"
+    },
+    "Search Business Documents": {
+      "id_column": "RELATIVE_PATH",
+      "max_results": 5, 
+      "name": "CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.SEARCH_BUSINESS_DOCS",
+      "title_column": "TITLE"
+    },
+    "Web_Scrape_Regulatory_Data": {
+      "execution_environment": {
+        "query_timeout": 120,
+        "type": "warehouse",
+        "warehouse": "CRO_DEMO_WH"
+      },
+      "identifier": "CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.WEB_SCRAPE_REGULATORY_DATA",
+      "name": "WEB_SCRAPE_REGULATORY_DATA(VARCHAR)",
+      "type": "function"
+    },
+    "Send_CRO_Alert": {
+      "execution_environment": {
+        "query_timeout": 30,
+        "type": "warehouse", 
+        "warehouse": "CRO_DEMO_WH"
+      },
+      "identifier": "CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.SEND_CRO_ALERT",
+      "name": "SEND_CRO_ALERT(VARCHAR, VARCHAR, VARCHAR, VARCHAR)",
+      "type": "procedure"
+    },
+    "Get_CRO_File_URL": {
+      "execution_environment": {
+        "query_timeout": 30,
+        "type": "warehouse",
+        "warehouse": "CRO_DEMO_WH"  
+      },
+      "identifier": "CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.GET_CRO_FILE_URL_SP",
+      "name": "GET_CRO_FILE_URL_SP(VARCHAR, DEFAULT NUMBER)",
+      "type": "procedure"
+    }
+  }
+}
+$$;
 
 -- ========================================================================
 -- VERIFICATION
