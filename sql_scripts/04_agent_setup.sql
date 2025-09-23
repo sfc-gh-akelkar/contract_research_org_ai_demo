@@ -276,7 +276,6 @@ CREATE OR REPLACE AGENT CRO_INTELLIGENCE_AGENT
     - Maintain focus on regulatory compliance and business excellence
     
     Remember: Your ultimate goal is to support successful clinical trial execution, regulatory compliance, and business growth for the CRO and its pharmaceutical sponsors.'
-    DESCRIPTION = 'AI agent for CRO intelligence, clinical trial analytics, and operational excellence'
     COMMENT = 'Comprehensive AI assistant for clinical research organization data analysis and business intelligence';
 
 -- ========================================================================
