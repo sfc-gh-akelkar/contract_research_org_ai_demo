@@ -203,23 +203,8 @@ $$;
 -- Create the CRO intelligence AI agent
 CREATE OR REPLACE AGENT CRO_INTELLIGENCE_AGENT
     TOOLS = (
-        SYSTEM$CORTEX_ANALYST(
-            '{
-                "semantic_models": [
-                    "CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.CLINICAL_OPERATIONS_VIEW",
-                    "CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.BUSINESS_DEVELOPMENT_VIEW"
-                ]
-            }'
-        ),
-        SYSTEM$CORTEX_SEARCH(
-            '{
-                "services": [
-                    {"name": "SEARCH_REGULATORY_DOCS", "description": "Search ICH-GCP guidelines, regulatory requirements, and compliance documentation for clinical trials"},
-                    {"name": "SEARCH_OPERATIONS_DOCS", "description": "Search site management SOPs, operational procedures, and monitoring guidelines"},
-                    {"name": "SEARCH_BUSINESS_DOCS", "description": "Search therapeutic area expertise, competitive intelligence, and business development documentation"}
-                ]
-            }'
-        ),
+        'SYSTEM$CORTEX_ANALYST',
+        'SYSTEM$CORTEX_SEARCH',
         'CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.GET_CRO_FILE_URL_SP',
         'CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.SEND_CRO_ALERT',
         'CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.WEB_SCRAPE_REGULATORY_DATA'
