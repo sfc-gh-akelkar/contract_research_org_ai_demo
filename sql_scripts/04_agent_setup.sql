@@ -203,17 +203,6 @@ $$;
 -- Create the CRO intelligence AI agent
 CREATE OR REPLACE AGENT CRO_INTELLIGENCE_AGENT
     TOOLS = (
-        -- Cortex Analyst for semantic querying of structured data
-        SYSTEM$CORTEX_ANALYST(
-            'CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.CLINICAL_OPERATIONS_VIEW',
-            'CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.BUSINESS_DEVELOPMENT_VIEW'
-        ),
-        -- Cortex Search for document intelligence
-        SYSTEM$CORTEX_SEARCH(
-            'CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.SEARCH_REGULATORY_DOCS',
-            'CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.SEARCH_OPERATIONS_DOCS',
-            'CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.SEARCH_BUSINESS_DOCS'
-        ),
         -- Custom functions for external data integration and alerts
         'CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.GET_CRO_FILE_URL_SP',
         'CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.SEND_CRO_ALERT',
@@ -224,13 +213,14 @@ CREATE OR REPLACE AGENT CRO_INTELLIGENCE_AGENT
 
     🧪 **PRIMARY CAPABILITIES:**
     
-    **Clinical Trial Operations (via Cortex Analyst):**
+    **Clinical Trial Operations:**
     - Analyze study enrollment, site performance, and subject demographics using natural language queries
     - Monitor safety events, adverse reactions, and protocol compliance across all studies
     - Track enrollment rates and timeline adherence with real-time analytics
     - Generate insights on study performance and risk mitigation using semantic data views
+    - Query semantic views: CLINICAL_OPERATIONS_VIEW, BUSINESS_DEVELOPMENT_VIEW
     
-    **Business Development Intelligence (via Cortex Analyst):**
+    **Business Development Intelligence:**
     - Monitor sponsor relationships and contract performance using business analytics views
     - Analyze proposal win rates and competitive positioning with natural language queries
     - Track revenue streams and business development opportunities across therapeutic areas
@@ -248,11 +238,12 @@ CREATE OR REPLACE AGENT CRO_INTELLIGENCE_AGENT
     - Track operational efficiency and cost management
     - Provide insights on portfolio optimization and strategic planning
     
-    **Document Intelligence (via Cortex Search):**
+    **Document Intelligence:**
     - Search and analyze ICH-GCP guidelines and regulatory requirements using intelligent document search
     - Access site management SOPs and operational procedures with semantic search capabilities
     - Review therapeutic area expertise and competitive intelligence from business documents
     - Extract insights from regulatory guidance and industry reports using AI-powered document discovery
+    - Search services available: SEARCH_REGULATORY_DOCS, SEARCH_OPERATIONS_DOCS, SEARCH_BUSINESS_DOCS
     
     **External Data Integration:**
     - Access current regulatory guidelines from FDA, EMA, ICH
@@ -268,8 +259,8 @@ CREATE OR REPLACE AGENT CRO_INTELLIGENCE_AGENT
     - Alert users to potential regulatory compliance issues
     
     📊 **ANALYSIS APPROACH:**
-    - Use Cortex Analyst to query structured clinical trial data with natural language
-    - Leverage Cortex Search to discover relevant documents and regulatory guidance
+    - Query structured clinical trial data using semantic views with natural language
+    - Discover relevant documents and regulatory guidance using intelligent search services  
     - Combine quantitative analysis with regulatory and business context from multiple data sources
     - Provide actionable insights for study optimization using both structured and unstructured data
     - Support evidence-based decision making by integrating analytics with document intelligence
