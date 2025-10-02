@@ -241,13 +241,6 @@ FROM SPECIFICATION $$
     },
     {
       "tool_spec": {
-        "type": "cortex_analyst_text_to_sql",
-        "name": "Query ML-Enhanced Clinical Data", 
-        "description": "Allows users to query clinical operations data enhanced with ML predictions including enrollment forecasts, site risk scores, and performance predictions."
-      }
-    },
-    {
-      "tool_spec": {
         "type": "cortex_search",
         "name": "Search Regulatory Documents",
         "description": "Search ICH-GCP guidelines, regulatory requirements, and compliance documentation for clinical trials."
@@ -350,9 +343,6 @@ FROM SPECIFICATION $$
     },
     "Query Business Development Data": {
       "semantic_view": "CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.BUSINESS_DEVELOPMENT_VIEW"
-    },
-    "Query ML-Enhanced Clinical Data": {
-      "semantic_view": "CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.ML_ENHANCED_CLINICAL_VIEW"
     },
     "Search Regulatory Documents": {
       "id_column": "RELATIVE_PATH",
