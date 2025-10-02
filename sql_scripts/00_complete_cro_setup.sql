@@ -6,7 +6,7 @@
 /*
 🧪 CRO AI DEMO - MODULAR SETUP
 
-This demo has been organized into 5 focused scripts for better modularity:
+This demo has been organized into 4 focused scripts for better modularity:
 
 📋 **SCRIPT OVERVIEW:**
 1. 📊 01_cro_data_setup.sql            - Database, tables, sample data
@@ -14,7 +14,6 @@ This demo has been organized into 5 focused scripts for better modularity:
 3. 🔍 02a_cro_documents_data.sql       - Load documents into Snowflake tables
 4. 🧠 03_semantic_views_setup.sql      - Natural language query views
 5. 🤖 04_agent_setup.sql               - AI agent and custom functions
-6. 🎯 05_ml_data_setup.sql             - ML feature tables (OPTIONAL, for recruitment prediction demo)
 
 📋 **EXECUTION OPTIONS:**
 
@@ -53,9 +52,6 @@ Run only the scripts you need for your specific demo requirements.
 -- Step 4: AI Agent Setup
 !source 04_agent_setup.sql;
 
--- Step 5: ML Data Setup (Optional - for recruitment prediction demo)
-!source 05_ml_data_setup.sql;
-
 */
 
 -- ========================================================================
@@ -91,14 +87,9 @@ SELECT
     'Configures AI agent with CRO-specific capabilities'
 UNION ALL
 SELECT 
-    '5️⃣',
-    'Run 05_ml_data_setup.sql (OPTIONAL)',
-    'Sets up ML feature tables for patient recruitment prediction demo'
-UNION ALL
-SELECT 
     '🎯',
     'Demo Ready!',
-    'Base CRO intelligence demo (+ optional ML demo with step 5)'
+    'Complete CRO intelligence demo with AI-powered insights'
 ORDER BY step;
 
 -- ========================================================================

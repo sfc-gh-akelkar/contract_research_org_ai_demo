@@ -1,29 +1,22 @@
 # Snowflake Intelligence Demo - Contract Research Organization
-**Clinical Trial Analytics & ML-Powered Operations Platform**
+**Clinical Trial Analytics & AI-Powered Operations Platform**
 
-This project demonstrates comprehensive Snowflake Intelligence capabilities for contract research organizations (CROs). The demo showcases clinical trial management, **Python-first machine learning**, sponsor relationship analytics, regulatory compliance insights, and GCP-compliant data governance for biotechnology and pharmaceutical companies.
+This project demonstrates comprehensive Snowflake Intelligence capabilities for contract research organizations (CROs). The demo showcases clinical trial management, sponsor relationship analytics, regulatory compliance insights, and GCP-compliant data governance for biotechnology and pharmaceutical companies.
 
 ## 🎯 CRO Intelligence Capabilities
 
 ### **Core Platform**
 - **🧪 Clinical Trial Analytics** - Study performance, enrollment tracking, site management, safety monitoring
-- **🤖 ML-Powered Predictions** - Enrollment forecasting, site risk scoring, portfolio optimization (Python + scikit-learn)
+- **🤖 AI-Powered Insights** - Natural language queries, document intelligence, automated analytics
 - **📊 Business Development** - Sponsor relationships, proposal analytics, competitive intelligence
 - **🔬 Regulatory & Data Management** - Submission tracking, compliance monitoring, data quality metrics
 - **🔒 GCP/GLP Compliance** - Good Clinical Practice governance with role-based access controls
 - **🌐 External Data Integration** - Regulatory databases, medical literature, competitive intelligence
 
-### **Machine Learning Capabilities** ⭐ NEW
-- **Patient Recruitment Prediction** - Random Forest for site performance classification & enrollment rate forecasting
-- **SQL + Python Integration** - Seamless data exploration (SQL) → ML modeling (Python) in Snowflake Notebooks
-- **Dual Model Approach** - Classification (High/Medium/Low) + Regression (exact enrollment rates)
-- **Production Deployment** - Batch predictions written to SQL tables for business user access
-- **Quantified ROI** - $5-15M savings per trial through AI-powered site selection
-
 ## Quick Start
 
 ### Modular Setup (Recommended)
-The demo uses a modular approach with 5 focused scripts:
+The demo uses a modular approach with 4 focused scripts:
 
 **Option A: Complete Automated Setup**
 ```sql
@@ -45,9 +38,6 @@ The demo uses a modular approach with 5 focused scripts:
 
 -- Step 4: AI Agent (Functions, procedures, agent)
 /sql_scripts/04_agent_setup.sql
-
--- Step 5: Machine Learning Data Setup ⭐ NEW
-/sql_scripts/05_ml_data_setup.sql
 ```
 
 **Benefits of Modular Approach:**
@@ -64,8 +54,6 @@ The demo uses a modular approach with 5 focused scripts:
 - 2 semantic views for natural language queries (Clinical Ops + Business Dev)
 - 3 Cortex Search services for regulatory and operational documents
 - GCP/GLP-compliant AI agent with multi-tool capabilities
-- **ML feature table** (`SITE_PERFORMANCE_FEATURES`) with 150 sample sites ⭐ NEW
-- **Predictions table** (`SITE_PREDICTIONS`) for model output ⭐ NEW
 
 ## CRO Data Model
 
@@ -168,11 +156,9 @@ The **CRO Intelligence Assistant** provides:
 ### 🤖 AI-Powered Clinical Intelligence
 - **Natural Language Queries**: Ask complex clinical trial questions in plain English via Cortex Analyst
 - **Document Intelligence**: Cortex Search across regulatory, operational, and business documents
-- **SQL + Python Integration**: Seamless workflow in Snowflake Notebooks (explore with SQL, model with Python)
-- **Predictive Site Selection**: Random Forest models for High/Medium/Low performance classification + enrollment rate forecasting
-- **Production ML Deployment**: Batch predictions saved to SQL tables for business user access
-- **Quantified Business Impact**: $5-15M savings per trial through AI-powered recruitment optimization
+- **Intelligent Analytics**: AI-powered insights for clinical trial optimization
 - **Real-Time Monitoring**: Automated alerts for study milestones, safety signals, and quality issues
+- **Predictive Insights**: Data-driven recommendations for operational excellence
 
 ### 🌐 External Data Integration
 - **Regulatory Databases**: FDA, EMA, and global regulatory agency data feeds
@@ -209,18 +195,16 @@ The **CRO Intelligence Assistant** provides:
 ## CRO Value Propositions
 
 ### 🎯 Clinical Trial Excellence
-- **25-40% faster** patient enrollment through AI-powered site selection
-- **$5-15M savings per trial** from accelerated timelines and better site selection ⭐ QUANTIFIED
+- **Faster patient enrollment** through AI-powered insights
 - **Enhanced study quality** through real-time safety monitoring
 - **Evidence-based protocols** with instant access to regulatory guidance
-- **Data-driven decisions** replace gut feel in site selection
+- **Data-driven decisions** for operational optimization
 
 ### ⚡ Operational Efficiency  
-- **85-90% accuracy** in predicting site performance (High/Medium/Low classification)
-- **R² 0.80-0.90** for enrollment rate forecasting (subjects per month)
 - **Reduced manual reporting** time for regulatory submissions
 - **Optimized resource allocation** based on predictive analytics
-- **SQL + Python** in one platform - no data movement, no separate tools
+- **Streamlined workflows** through unified platform approach
+- **Improved data quality** through automated monitoring
 
 ### 🔬 Business Development Acceleration
 - **50% faster** proposal response and competitive analysis
@@ -239,19 +223,7 @@ The **CRO Intelligence Assistant** provides:
 ### **Demo Scripts**
 - **`Demo_Script_15min_CRO.md`** - Complete 15-minute presentation guide (Foundation-Advanced-Strategic approach)
 
-### **Interactive Notebooks** ⭐ PRIMARY DEMO ASSET
-- **`CRO_Patient_Recruitment_ML_Demo.ipynb`** - **Focused 40-minute ML demo** (~36 cells)
-  - **Use Case**: Patient recruitment prediction & site selection
-  - **Audience**: Data scientists + clinical operations teams
-  - **Flow**: Business Problem → SQL Exploration → Python ML → Deployment → ROI
-  - **Models**: Classification (High/Med/Low) + Regression (enrollment rate)
-  - **Tools**: scikit-learn Random Forest, Snowpark, pandas
-  - **Business Impact**: $5-15M savings per trial quantified
-  - Serves both technical validation AND customer demos
-
 ### **Documentation**
-- **`ML_DEMO_NOTEBOOK_SPEC.md`** - Complete 36-cell specification with code snippets for building the notebook
-- **`ARCHIVE_SUMMARY.md`** - Details on archived ML work (v1 complex demo preserved in branch)
 - **`CRO_Data_Model_ERD.md`** - Comprehensive data model with ERD diagrams
 - **`README.md`** (this file) - Project overview and setup instructions
 
@@ -262,7 +234,6 @@ The **CRO Intelligence Assistant** provides:
 - `02a_cro_documents_data.sql` - Document data loading
 - `03_semantic_views_setup.sql` - Natural language query views
 - `04_agent_setup.sql` - AI agent configuration
-- `05_ml_data_setup.sql` - ML feature tables and 150 sample sites ⭐ NEW
 
 ## Contact & Collaboration
 
@@ -272,30 +243,24 @@ This demo showcases Snowflake Intelligence capabilities for contract research or
 
 ## 🚀 What Makes This Demo Unique
 
-### **Focused, Customer-Ready ML Demo**
-- **Clear use case**: Patient recruitment prediction (addresses #1 CRO pain point)
-- **Dual approach**: Classification (High/Med/Low) + Regression (enrollment rate)
-- **40-minute walkthrough**: Business problem → Data → ML → Deployment → ROI
-- **Quantified impact**: $5-15M savings per trial with detailed ROI calculation
+### **Comprehensive CRO Intelligence Platform**
+- **Complete workflow**: Clinical trial management, regulatory compliance, business development
+- **AI-powered insights**: Natural language queries, document intelligence, automated analytics
+- **Industry-focused**: Built specifically for CRO operations and challenges
+- **Regulatory ready**: GCP/GLP compliant with audit trails and security controls
 
-### **SQL + Python Integration**
-- **Seamless workflow**: Explore with SQL → Model with Python → Deploy to SQL
-- **Familiar tools**: scikit-learn Random Forest, pandas, Snowpark
-- **No data movement**: Everything runs on Snowflake compute
-- **Business user friendly**: Predictions available via SQL queries
+### **Unified Snowflake Platform**
+- **Single source of truth**: All clinical trial data in one secure platform
+- **No data silos**: Seamless integration across all CRO functions
+- **Scalable architecture**: Handles enterprise-scale clinical trial operations
+- **Real-time insights**: Immediate access to critical operational metrics
 
-### **Production-Ready from Day One**
-- **150 sample sites**: 50 High, 60 Medium, 40 Low performers
-- **18 engineered features**: Enrollment rates, quality scores, investigator experience
-- **Realistic metrics**: 85-90% accuracy (classification), R² 0.80-0.90 (regression)
-- **Complete workflow**: Training → Predictions → SQL table → Business insights
-
-### **Clean, Maintainable Structure**
-- **36 cells total**: Easy to navigate and walk through
-- **Modular sections**: Business → Data → Training → Deployment → Impact
-- **No hidden complexity**: All ML logic visible in notebook (not buried in procedures)
-- **Archive available**: Previous 61-cell version preserved in `archive/ml-demo-v1-complex` branch
+### **Production-Ready Implementation**
+- **Modular setup**: 4 focused scripts for easy deployment and maintenance
+- **Role-based security**: GCP/GLP compliant access controls
+- **Complete data model**: Clinical trials, sponsors, regulatory, financial operations
+- **Extensible framework**: Easy to customize for specific CRO requirements
 
 ---
 
-**Built with Snowflake Intelligence** | **GCP/GLP Compliant** | **CRO Focused** | **Regulatory Ready** | **Python-First ML** ⭐ NEW
+**Built with Snowflake Intelligence** | **GCP/GLP Compliant** | **CRO Focused** | **Regulatory Ready**
