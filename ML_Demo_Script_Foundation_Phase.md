@@ -63,7 +63,7 @@ WHERE TABLE_SCHEMA = 'ML_MODELS';
 
 **Open the Snowflake Notebook:**
 ```
-CRO_ML_Comprehensive_Demo.ipynb
+CRO_ML_Complete_Technical_Demo.ipynb
 ```
 
 **Talking Points:**
