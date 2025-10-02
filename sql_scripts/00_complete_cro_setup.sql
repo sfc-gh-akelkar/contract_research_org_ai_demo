@@ -6,18 +6,19 @@
 /*
 🧪 CRO AI DEMO - MODULAR SETUP
 
-This demo has been organized into 4 focused scripts for better modularity:
+This demo has been organized into 5 focused scripts for better modularity:
 
 📋 **SCRIPT OVERVIEW:**
 1. 📊 01_cro_data_setup.sql            - Database, tables, sample data
 2. 🔍 02_cortex_search_setup.sql       - Document search services  
 3. 🧠 03_semantic_views_setup.sql      - Natural language query views
 4. 🤖 04_agent_setup.sql               - AI agent and custom functions
+5. 🤖 05_ml_crawl_phase_setup.sql      - ML models and predictions (CRAWL phase)
 
 📋 **EXECUTION OPTIONS:**
 
 **Option A: Run All Scripts Automatically**
-Execute this master script to run all 4 scripts in sequence.
+Execute this master script to run all 5 scripts in sequence.
 
 **Option B: Run Scripts Individually** 
 Execute each script separately for step-by-step setup:
@@ -50,6 +51,9 @@ Run only the scripts you need for your specific demo requirements.
 
 -- Step 4: AI Agent Setup
 !source 04_agent_setup.sql;
+
+-- Step 5: ML CRAWL Phase Setup
+!source 05_ml_crawl_phase_setup.sql;
 
 */
 
@@ -86,9 +90,14 @@ SELECT
     'Configures AI agent with CRO-specific capabilities'
 UNION ALL
 SELECT 
+    '5️⃣',
+    'Run 05_ml_crawl_phase_setup.sql',
+    'Sets up ML models for enrollment prediction and site risk scoring'
+UNION ALL
+SELECT 
     '🎯',
     'Demo Ready!',
-    '15-minute CRO intelligence demo'
+    '15-minute CRO intelligence demo with ML capabilities'
 ORDER BY step;
 
 -- ========================================================================
