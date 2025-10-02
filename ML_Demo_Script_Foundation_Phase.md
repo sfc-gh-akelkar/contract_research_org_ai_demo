@@ -1,16 +1,16 @@
-# 🤖 **CRO ML Demo Script - CRAWL Phase**
-## **Building Trust with Foundational ML Capabilities**
+# 🤖 **CRO ML Demo Script - Foundation Phase**
+## **Building Trust with Core ML Capabilities**
 
 ---
 
 ## 🎯 **Demo Overview (15 minutes)**
 **Audience**: Seasoned ML Data Scientists at Medpace  
-**Approach**: Crawl-Walk-Run progression to build credibility  
-**Focus**: Foundational ML use cases that solve real CRO problems  
+**Approach**: Foundation-Advanced-Strategic progression to build credibility  
+**Focus**: Core ML use cases that solve real CRO problems  
 
 ---
 
-## 📋 **CRAWL Phase - Foundational ML (15 minutes)**
+## 📋 **Foundation Phase - Core ML (15 minutes)**
 
 ### **🏗️ Opening - Platform Foundation (2 minutes)**
 
@@ -139,7 +139,7 @@ SELECT * FROM HIGH_RISK_SITES_ALERT;
 
 ## 🎯 **Closing - What We've Built (1 minute)**
 
-### **CRAWL Phase Achievements:**
+### **Foundation Phase Achievements:**
 ✅ **Enrollment Prediction Model** - Linear regression with clinical features  
 ✅ **Site Risk Scoring Model** - Logistic regression for performance prediction  
 ✅ **ML-Enhanced Semantic Views** - Natural language access to ML insights  
@@ -152,7 +152,7 @@ SELECT * FROM HIGH_RISK_SITES_ALERT;
 - **Data-driven site selection** for new studies
 
 ### **Next Steps Teaser:**
-*"This is just the CRAWL phase. In the WALK phase, we'll show you:**
+*"This is just the Foundation phase. In the Advanced phase, we'll show you:**
 - **Patient recruitment optimization** with clustering algorithms
 - **Clinical data anomaly detection** with unsupervised learning  
 - **Advanced feature engineering** with external data integration"*
@@ -196,4 +196,4 @@ SELECT * FROM HIGH_RISK_SITES_ALERT;
 
 ---
 
-*"This CRAWL phase demonstrates that Snowflake isn't just a data warehouse - it's a complete ML platform that understands clinical research. Ready to see the WALK phase?"* 🚀
+*"This Foundation phase demonstrates that Snowflake isn't just a data warehouse - it's a complete ML platform that understands clinical research. Ready to see the Advanced phase?"* 🚀

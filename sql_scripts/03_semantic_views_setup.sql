@@ -163,7 +163,7 @@ CREATE OR REPLACE SEMANTIC VIEW CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.BUSINESS_
 	);
 
 -- ========================================================================
--- ML-ENHANCED SEMANTIC VIEW (CRAWL PHASE)
+-- ML-ENHANCED SEMANTIC VIEW (FOUNDATION PHASE)
 -- ========================================================================
 
 -- ML-Enhanced Clinical Operations View with Predictions
@@ -276,4 +276,4 @@ GRANT USAGE ON SEMANTIC VIEW ML_ENHANCED_CLINICAL_VIEW TO ROLE SF_INTELLIGENCE_D
 
 SELECT 'CRO Semantic Views Setup Complete!' as status,
        'Views Created: 3 CRO-focused semantic views with ML enhancements' as views_created,
-       'ML Integration: CRAWL phase ML predictions integrated into semantic layer' as ml_status;
+       'ML Integration: Foundation phase ML predictions integrated into semantic layer' as ml_status;

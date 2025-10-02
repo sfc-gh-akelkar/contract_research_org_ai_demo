@@ -1,6 +1,6 @@
 -- ========================================================================
--- CRO DEMO - Step 5: ML CRAWL Phase Setup
--- Implements foundational ML capabilities for Medpace demo
+-- CRO DEMO - Step 5: ML Foundation Phase Setup
+-- Implements core ML capabilities for Medpace demo
 -- Prerequisites: Run steps 1-4 first
 -- ========================================================================
 
@@ -229,7 +229,7 @@ def train_enrollment_model(session):
                 PARSE_JSON('{json.dumps({"algorithm": "LinearRegression"})}'),
                 'Historical data through {datetime.now().strftime("%Y-%m-%d")}',
                 'ML_SYSTEM',
-                'CRAWL Phase - Simple enrollment prediction using linear regression'
+                'Foundation Phase - Simple enrollment prediction using linear regression'
             )
         """).collect()
         
@@ -332,7 +332,7 @@ def train_site_risk_model(session):
                 PARSE_JSON('{json.dumps({"algorithm": "LogisticRegression", "random_state": 42})}'),
                 'Historical data through {datetime.now().strftime("%Y-%m-%d")}',
                 'ML_SYSTEM',
-                'CRAWL Phase - Site risk classification using logistic regression'
+                'Foundation Phase - Site risk classification using logistic regression'
             )
         """).collect()
         
@@ -659,7 +659,7 @@ GRANT SELECT ON VIEW ML_PREDICTIONS_SUMMARY TO ROLE SF_INTELLIGENCE_DEMO;
 GRANT SELECT ON VIEW HIGH_RISK_SITES_ALERT TO ROLE SF_INTELLIGENCE_DEMO;
 GRANT SELECT ON VIEW ENROLLMENT_PERFORMANCE_FORECAST TO ROLE SF_INTELLIGENCE_DEMO;
 
-SELECT 'ML CRAWL Phase Setup Complete!' as status,
+SELECT 'ML Foundation Phase Setup Complete!' as status,
        'Models: Enrollment Prediction + Site Risk Scoring' as models_created,
        'Predictions: Generated for current studies and sites' as predictions_status,
        'Views: 3 ML insight views created' as views_created;
