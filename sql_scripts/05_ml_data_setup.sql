@@ -11,13 +11,32 @@ USE SCHEMA CLINICAL_OPERATIONS_SCHEMA;
 USE WAREHOUSE CRO_DEMO_WH;
 
 -- ========================================================================
+-- IDEMPOTENCY CHECK
+-- This script is safe to run multiple times - it won't recreate/reload if data exists
+-- ========================================================================
+
+-- Check if ML tables already exist
+SELECT 
+    CASE 
+        WHEN EXISTS (
+            SELECT 1 FROM INFORMATION_SCHEMA.TABLES 
+            WHERE TABLE_SCHEMA = 'CLINICAL_OPERATIONS_SCHEMA' 
+              AND TABLE_NAME = 'SITE_PERFORMANCE_FEATURES'
+        ) AND EXISTS (
+            SELECT 1 FROM SITE_PERFORMANCE_FEATURES LIMIT 1
+        )
+        THEN '⚠️  ML tables already exist with data. Script will skip data insertion. To reload, run: TRUNCATE TABLE SITE_PERFORMANCE_FEATURES;'
+        ELSE '✅ ML tables will be created or data will be inserted.'
+    END as setup_status;
+
+-- ========================================================================
 -- ML FEATURE TABLE: SITE_PERFORMANCE_FEATURES
 -- ========================================================================
 
 -- This table contains historical site performance data with engineered features
 -- Used for training the recruitment prediction model
 
-CREATE OR REPLACE TABLE SITE_PERFORMANCE_FEATURES (
+CREATE TABLE IF NOT EXISTS SITE_PERFORMANCE_FEATURES (
     SITE_ID VARCHAR(50),
     SITE_NAME VARCHAR(200),
     COUNTRY VARCHAR(100),
@@ -57,10 +76,12 @@ CREATE OR REPLACE TABLE SITE_PERFORMANCE_FEATURES (
 
 -- ========================================================================
 -- INSERT COMPREHENSIVE SAMPLE DATA (150 sites)
+-- Only runs if table is empty
 -- ========================================================================
 
 -- High Performing Sites (50 sites)
 INSERT INTO SITE_PERFORMANCE_FEATURES 
+SELECT * FROM (
 SELECT 
     'SITE_' || LPAD(SEQ4(), 3, '0') as SITE_ID,
     CASE (UNIFORM(1, 10, RANDOM()) % 10)
@@ -128,10 +149,12 @@ SELECT
     UNIFORM(8.0, 15.0, RANDOM()) as PREDICTED_ENROLLMENT_RATE,
     
     CURRENT_TIMESTAMP() as CREATED_DATE
-FROM TABLE(GENERATOR(ROWCOUNT => 50));
+FROM TABLE(GENERATOR(ROWCOUNT => 50))
+) WHERE NOT EXISTS (SELECT 1 FROM SITE_PERFORMANCE_FEATURES LIMIT 1);
 
 -- Medium Performing Sites (60 sites)
 INSERT INTO SITE_PERFORMANCE_FEATURES 
+SELECT * FROM (
 SELECT 
     'SITE_' || LPAD(SEQ4() + 50, 3, '0') as SITE_ID,
     CASE (UNIFORM(1, 10, RANDOM()) % 10)
@@ -202,10 +225,12 @@ SELECT
     UNIFORM(4.0, 8.0, RANDOM()) as PREDICTED_ENROLLMENT_RATE,
     
     CURRENT_TIMESTAMP() as CREATED_DATE
-FROM TABLE(GENERATOR(ROWCOUNT => 60));
+FROM TABLE(GENERATOR(ROWCOUNT => 60))
+) WHERE NOT EXISTS (SELECT 1 FROM SITE_PERFORMANCE_FEATURES WHERE SITE_TIER = 'Tier 2' LIMIT 1);
 
 -- Low Performing Sites (40 sites)
 INSERT INTO SITE_PERFORMANCE_FEATURES 
+SELECT * FROM (
 SELECT 
     'SITE_' || LPAD(SEQ4() + 110, 3, '0') as SITE_ID,
     CASE (UNIFORM(1, 8, RANDOM()) % 8)
@@ -273,13 +298,14 @@ SELECT
     UNIFORM(1.0, 4.0, RANDOM()) as PREDICTED_ENROLLMENT_RATE,
     
     CURRENT_TIMESTAMP() as CREATED_DATE
-FROM TABLE(GENERATOR(ROWCOUNT => 40));
+FROM TABLE(GENERATOR(ROWCOUNT => 40))
+) WHERE NOT EXISTS (SELECT 1 FROM SITE_PERFORMANCE_FEATURES WHERE SITE_TIER = 'Tier 3' LIMIT 1);
 
 -- ========================================================================
 -- CREATE TABLE FOR PREDICTIONS (will be populated by ML model)
 -- ========================================================================
 
-CREATE OR REPLACE TABLE SITE_PREDICTIONS (
+CREATE TABLE IF NOT EXISTS SITE_PREDICTIONS (
     SITE_ID VARCHAR(50),
     SITE_NAME VARCHAR(200),
     PREDICTED_CATEGORY VARCHAR(20),
@@ -310,7 +336,7 @@ ORDER BY
     END;
 
 SELECT 
-    'Total Sites: 150' as summary,
-    '50 High Performers, 60 Medium, 40 Low' as distribution,
-    'Ready for ML model training!' as next_step;
-
+    'Total Sites: ' || COUNT(*) as summary,
+    '50 High Performers, 60 Medium, 40 Low (if first run)' as distribution,
+    'Ready for ML model training!' as next_step
+FROM SITE_PERFORMANCE_FEATURES;
