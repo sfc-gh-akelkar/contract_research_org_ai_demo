@@ -14,11 +14,11 @@ This project demonstrates comprehensive Snowflake Intelligence capabilities for 
 - **🌐 External Data Integration** - Regulatory databases, medical literature, competitive intelligence
 
 ### **Machine Learning Capabilities** ⭐ NEW
-- **Enrollment Prediction** - Random Forest models for site performance forecasting
-- **Site Risk Scoring** - ML-based risk classification for proactive intervention  
-- **Site Clustering** - K-Means analysis for portfolio segmentation
-- **Site Similarity** - Euclidean distance for benchmarking and backup selection
-- **Complete MLOps** - Training → Registration → Prediction → Deployment in one platform
+- **Patient Recruitment Prediction** - Random Forest for site performance classification & enrollment rate forecasting
+- **SQL + Python Integration** - Seamless data exploration (SQL) → ML modeling (Python) in Snowflake Notebooks
+- **Dual Model Approach** - Classification (High/Medium/Low) + Regression (exact enrollment rates)
+- **Production Deployment** - Batch predictions written to SQL tables for business user access
+- **Quantified ROI** - $5-15M savings per trial through AI-powered site selection
 
 ## Quick Start
 
@@ -46,8 +46,8 @@ The demo uses a modular approach with 5 focused scripts:
 -- Step 4: AI Agent (Functions, procedures, agent)
 /sql_scripts/04_agent_setup.sql
 
--- Step 5: Machine Learning (ML models, features, predictions) ⭐ NEW
-/sql_scripts/05_ml_foundation_phase_setup.sql
+-- Step 5: Machine Learning Data Setup ⭐ NEW
+/sql_scripts/05_ml_data_setup.sql
 ```
 
 **Benefits of Modular Approach:**
@@ -60,14 +60,12 @@ The demo uses a modular approach with 5 focused scripts:
 - `SF_INTELLIGENCE_DEMO` role with CRO-specific permissions (reuses existing role)
 - `CRO_DEMO_WH` warehouse with auto-suspend/resume
 - `CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA` database and schema
-- `CRO_AI_DEMO.ML_MODELS` schema for machine learning ⭐ NEW
 - Clinical trial data model with full CRO operations focus
-- **ML feature tables** with 100-200 records for credible training ⭐ NEW
-- 4 semantic views for natural language queries (including ML-enhanced view)
+- 2 semantic views for natural language queries (Clinical Ops + Business Dev)
 - 3 Cortex Search services for regulatory and operational documents
 - GCP/GLP-compliant AI agent with multi-tool capabilities
-- **Python ML models**: Random Forest, K-Means clustering ⭐ NEW
-- **Complete MLOps pipeline**: Model registry, predictions, SQL deployment ⭐ NEW
+- **ML feature table** (`SITE_PERFORMANCE_FEATURES`) with 150 sample sites ⭐ NEW
+- **Predictions table** (`SITE_PREDICTIONS`) for model output ⭐ NEW
 
 ## CRO Data Model
 
@@ -169,11 +167,11 @@ The **CRO Intelligence Assistant** provides:
 
 ### 🤖 AI-Powered Clinical Intelligence
 - **Natural Language Queries**: Ask complex clinical trial questions in plain English via Cortex Analyst
-- **Python-First ML**: Random Forest, K-Means clustering using scikit-learn (familiar tools)
-- **Predictive Analytics**: Enrollment forecasting (R² > 0.75), site risk scoring (85%+ accuracy)
-- **Complete MLOps**: Training → Registration → Prediction → SQL Deployment in one platform
-- **Site Optimization**: K-Means clustering for portfolio segmentation and benchmarking
-- **Regulatory Intelligence**: Real-time guidance on submission requirements and timelines
+- **Document Intelligence**: Cortex Search across regulatory, operational, and business documents
+- **SQL + Python Integration**: Seamless workflow in Snowflake Notebooks (explore with SQL, model with Python)
+- **Predictive Site Selection**: Random Forest models for High/Medium/Low performance classification + enrollment rate forecasting
+- **Production ML Deployment**: Batch predictions saved to SQL tables for business user access
+- **Quantified Business Impact**: $5-15M savings per trial through AI-powered recruitment optimization
 - **Real-Time Monitoring**: Automated alerts for study milestones, safety signals, and quality issues
 
 ### 🌐 External Data Integration
@@ -211,19 +209,18 @@ The **CRO Intelligence Assistant** provides:
 ## CRO Value Propositions
 
 ### 🎯 Clinical Trial Excellence
-- **25% faster** patient enrollment through ML-powered predictive site selection
+- **25-40% faster** patient enrollment through AI-powered site selection
+- **$5-15M savings per trial** from accelerated timelines and better site selection ⭐ QUANTIFIED
 - **Enhanced study quality** through real-time safety monitoring
 - **Evidence-based protocols** with instant access to regulatory guidance
-- **Improved approval rates** through data-driven study optimization
-- **$5-15M annual savings** from enrollment prediction and risk scoring ⭐ QUANTIFIED
+- **Data-driven decisions** replace gut feel in site selection
 
 ### ⚡ Operational Efficiency  
-- **30% improvement** in site performance through Random Forest predictive analytics
-- **85%+ accuracy** in site risk scoring enables proactive intervention
-- **K-Means clustering** segments 4 site tiers for tailored management strategies
+- **85-90% accuracy** in predicting site performance (High/Medium/Low classification)
+- **R² 0.80-0.90** for enrollment rate forecasting (subjects per month)
 - **Reduced manual reporting** time for regulatory submissions
-- **Optimized resource allocation** based on study complexity and timelines
-- **Proactive risk management** preventing 60-80% of site performance issues ⭐ NEW
+- **Optimized resource allocation** based on predictive analytics
+- **SQL + Python** in one platform - no data movement, no separate tools
 
 ### 🔬 Business Development Acceleration
 - **50% faster** proposal response and competitive analysis
@@ -241,18 +238,20 @@ The **CRO Intelligence Assistant** provides:
 
 ### **Demo Scripts**
 - **`Demo_Script_15min_CRO.md`** - Complete 15-minute presentation guide (Foundation-Advanced-Strategic approach)
-- **`ML_Demo_Script_Foundation_Phase.md`** - Detailed ML demo script with Python-first workflows and ROI analysis
 
 ### **Interactive Notebooks** ⭐ PRIMARY DEMO ASSET
-- **`CRO_ML_Complete_Technical_Demo.ipynb`** - **Unified comprehensive notebook** (61 cells)
-  - Technical depth: EDA, validation, cross-validation, model comparison
-  - Modern ML: Random Forest, K-Means, Python-first development
-  - Complete workflow: Training → Registration → Prediction → Deployment
-  - Business context: ROI analysis, competitive advantage, use cases
+- **`CRO_Patient_Recruitment_ML_Demo.ipynb`** - **Focused 40-minute ML demo** (~36 cells)
+  - **Use Case**: Patient recruitment prediction & site selection
+  - **Audience**: Data scientists + clinical operations teams
+  - **Flow**: Business Problem → SQL Exploration → Python ML → Deployment → ROI
+  - **Models**: Classification (High/Med/Low) + Regression (enrollment rate)
+  - **Tools**: scikit-learn Random Forest, Snowpark, pandas
+  - **Business Impact**: $5-15M savings per trial quantified
   - Serves both technical validation AND customer demos
 
 ### **Documentation**
-- **`ML_NOTEBOOK_GUIDE.md`** - Complete guide for using the unified ML notebook
+- **`ML_DEMO_NOTEBOOK_SPEC.md`** - Complete 36-cell specification with code snippets for building the notebook
+- **`ARCHIVE_SUMMARY.md`** - Details on archived ML work (v1 complex demo preserved in branch)
 - **`CRO_Data_Model_ERD.md`** - Comprehensive data model with ERD diagrams
 - **`README.md`** (this file) - Project overview and setup instructions
 
@@ -263,7 +262,7 @@ The **CRO Intelligence Assistant** provides:
 - `02a_cro_documents_data.sql` - Document data loading
 - `03_semantic_views_setup.sql` - Natural language query views
 - `04_agent_setup.sql` - AI agent configuration
-- `05_ml_foundation_phase_setup.sql` - ML models and features ⭐ NEW
+- `05_ml_data_setup.sql` - ML feature tables and 150 sample sites ⭐ NEW
 
 ## Contact & Collaboration
 
@@ -273,29 +272,29 @@ This demo showcases Snowflake Intelligence capabilities for contract research or
 
 ## 🚀 What Makes This Demo Unique
 
-### **Python-First ML Development**
-- Data scientists use familiar tools: Python, pandas, scikit-learn
-- No proprietary ML languages or platforms
-- Full control over models, features, and hyperparameters
-- Interactive development in Snowflake Notebooks
+### **Focused, Customer-Ready ML Demo**
+- **Clear use case**: Patient recruitment prediction (addresses #1 CRO pain point)
+- **Dual approach**: Classification (High/Med/Low) + Regression (enrollment rate)
+- **40-minute walkthrough**: Business problem → Data → ML → Deployment → ROI
+- **Quantified impact**: $5-15M savings per trial with detailed ROI calculation
 
-### **Complete MLOps in One Platform**
-- Training → Registration → Prediction → Deployment
-- No separate model serving infrastructure
-- No data movement between systems
-- Business users access via natural language (Cortex Analyst)
+### **SQL + Python Integration**
+- **Seamless workflow**: Explore with SQL → Model with Python → Deploy to SQL
+- **Familiar tools**: scikit-learn Random Forest, pandas, Snowpark
+- **No data movement**: Everything runs on Snowflake compute
+- **Business user friendly**: Predictions available via SQL queries
 
 ### **Production-Ready from Day One**
-- 100-200 records of realistic clinical trial data
-- Validated models with cross-validation
-- Model registry with full metadata
-- SQL deployment for business user access
+- **150 sample sites**: 50 High, 60 Medium, 40 Low performers
+- **18 engineered features**: Enrollment rates, quality scores, investigator experience
+- **Realistic metrics**: 85-90% accuracy (classification), R² 0.80-0.90 (regression)
+- **Complete workflow**: Training → Predictions → SQL table → Business insights
 
-### **Technical Validation + Customer Demo**
-- Single unified notebook serves both purposes
-- Progressive complexity: Linear → Random Forest → K-Means
-- Complete workflow visible (not hidden in SQL procedures)
-- ROI quantified: $5-15M annual impact
+### **Clean, Maintainable Structure**
+- **36 cells total**: Easy to navigate and walk through
+- **Modular sections**: Business → Data → Training → Deployment → Impact
+- **No hidden complexity**: All ML logic visible in notebook (not buried in procedures)
+- **Archive available**: Previous 61-cell version preserved in `archive/ml-demo-v1-complex` branch
 
 ---
 
