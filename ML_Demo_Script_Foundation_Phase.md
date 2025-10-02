@@ -4,7 +4,7 @@
 ---
 
 ## 🎯 **Demo Overview (15 minutes)**
-**Audience**: Seasoned ML Data Scientists at Medpace  
+**Audience**: Seasoned ML Data Scientists at mid-sized CRO organizations  
 **Approach**: Foundation-Advanced-Strategic progression to build credibility  
 **Focus**: Core ML use cases that solve real CRO problems  
 
@@ -149,7 +149,7 @@ ORDER BY predicted_enrollment_rate DESC;
 *"Let's talk numbers. If we can improve enrollment timeline accuracy by just 25%:"*
 - *"Average study delay cost: $2-8M per month"*
 - *"Potential savings per study: $500K to $2M"*
-- *"Across Medpace's portfolio: $5-15M annually"*
+- *"Across a typical CRO portfolio: $5-15M annually"*
 
 **Operational Benefits:**
 - *"Site selection becomes data-driven, not relationship-driven"*
@@ -327,7 +327,7 @@ ORDER BY risk_probability DESC;
 - *"Data scientists focus on insights, not data engineering"*
 
 ### **The Competitive Edge:**
-*"This is how a mid-sized CRO like Medpace competes with industry giants:"*
+*"This is how mid-sized CROs compete with industry giants:"*
 - *"Predictive capabilities that larger CROs don't have"*
 - *"Data-driven sponsor conversations with quantified risk assessments"*
 - *"Faster, more accurate feasibility and site selection"*
@@ -447,7 +447,7 @@ ORDER BY risk_probability DESC;
 ### **Closing Strong:**
 **Always End With:**
 1. **Quantified Value**: Specific ROI numbers
-2. **Competitive Advantage**: How this differentiates Medpace
+2. **Competitive Advantage**: How this differentiates mid-sized CROs
 3. **Next Steps**: Clear path forward
 4. **Strategic Challenge**: Make them think about their competitive position
 

@@ -1,6 +1,6 @@
 -- ========================================================================
 -- CRO DEMO - Step 5: ML Foundation Phase Setup
--- Implements core ML capabilities for Medpace demo
+-- Implements core ML capabilities for CRO demo
 -- Prerequisites: Run steps 1-4 first
 -- ========================================================================
 
