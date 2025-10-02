@@ -56,9 +56,24 @@ WHERE TABLE_SCHEMA = 'ML_MODELS';
 **Pause for effect, then continue:**
 *"What if you could predict which sites will hit their targets before you even start enrolling? Let me show you how we built that capability."*
 
-#### **Show the ML Workflow (4 minutes):**
+#### **Show the Python-First ML Workflow (4 minutes):**
 
-**1. Feature Engineering Deep Dive (90 seconds):**
+**1. Python Development Environment (60 seconds):**
+*"Let me show you something that will feel familiar - developing ML models in Python with scikit-learn, but deployed at enterprise scale."*
+
+**Open the Snowflake Notebook:**
+```
+CRO_ML_Comprehensive_Demo.ipynb
+```
+
+**Talking Points:**
+- *"This is a Snowflake Notebook - Jupyter-like experience, but your data never leaves Snowflake"*
+- *"Notice the imports: pandas, scikit-learn, plotly - the tools your data scientists already know"*
+- *"session = snowpark.session.get_active_session() - no connection strings, no credentials to manage"*
+
+**Key Message**: *"Your data scientists work in Python, but everything runs where your data lives."*
+
+**2. Feature Engineering Deep Dive (90 seconds):**
 ```sql
 -- Show ML features table
 SELECT 
@@ -84,16 +99,29 @@ LIMIT 5;
 
 **Key Point**: *"This is where clinical expertise meets data science. These aren't features a generic ML platform would think of."*
 
-**2. Model Training (60 seconds):**
+**3. Python Model Development (90 seconds):**
+*"Now let's see the actual model development - this is where your data scientists will feel right at home."*
+
+**Run the notebook cells showing:**
+- Random Forest model training with familiar scikit-learn syntax
+- Cross-validation and performance metrics
+- Feature importance analysis
+
+**Key Talking Points:**
+- *"RandomForestRegressor with 100 estimators - exactly what you'd write in any Python environment"*
+- *"R² score of 0.75, MAE of 1.2 subjects per week - we can predict enrollment within ±1.2 subjects per week"*
+- *"Feature importance shows historical_enrollment_rate is the top predictor - clinical intuition confirmed by data"*
+
+**4. Python to SQL Deployment (60 seconds):**
 ```sql
--- Train the model
-CALL CRO_AI_DEMO.ML_MODELS.TRAIN_ENROLLMENT_PREDICTION_MODEL();
+-- Deploy Python model to SQL infrastructure
+CALL CRO_AI_DEMO.ML_MODELS.DEPLOY_PYTHON_ML_PREDICTIONS();
 ```
 
 **While it runs, explain:**
-*"We're using linear regression because interpretability matters in clinical research. Regulators and sponsors need to understand why a model made a prediction. Watch the output..."*
+*"Here's the magic - your data scientists develop in Python, but the models deploy as SQL functions. Business users get natural language queries, data scientists get Python development."*
 
-**Point to results:** *"R² score of 0.78, MAE of 1.2 subjects per week. That means we can predict enrollment rates within ±1.2 subjects per week."*
+**Point to results:** *"✅ Successfully deployed 150+ Python ML predictions to SQL infrastructure. The Python model is now accessible via SQL views and Cortex Analyst."*
 
 **3. Generate and Analyze Predictions (90 seconds):**
 ```sql
@@ -132,7 +160,7 @@ ORDER BY predicted_enrollment_rate DESC;
 
 ---
 
-### **🎯 Use Case 2: Site Risk Scoring (6 minutes)**
+### **🎯 Use Case 2: Site Risk Scoring & K-Means Clustering (6 minutes)**
 
 #### **Business Problem Setup (1 minute):**
 *"Now let's tackle another critical challenge: site performance risk. Industry studies show that 30% of sites underperform, causing 60% of study delays. The cost? $50K to $200K per site to remediate, plus timeline delays."*
@@ -225,7 +253,20 @@ ORDER BY risk_probability DESC;
 - *"Average savings: $75K-150K per high-risk site"*
 - *"Reduced sponsor escalations and relationship damage"*
 
-**Key Message**: *"This transforms site management from reactive firefighting to proactive risk mitigation."*
+#### **Bonus: K-Means Site Clustering (1 minute):**
+*"But here's where Python really shines - what if we could segment all our sites by performance patterns using K-Means clustering?"*
+
+**Show the notebook clustering section:**
+- *"K-Means with 4 clusters using StandardScaler and Euclidean distance - exactly what you'd write in any Python environment"*
+- *"Elite Performers: 8+ enrollment rate, 85%+ completion rate - your expansion targets"*
+- *"Development Needed: <5 enrollment rate, >10% deviation rate - need immediate support"*
+- *"Reliable Partners: Consistent mid-tier performers - your backbone sites"*
+- *"Emerging Sites: Mixed performance with potential - coaching opportunities"*
+
+**Business Impact:**
+*"Now you can tailor site management strategy by cluster. Elite Performers get complex studies, Development Needed sites get additional training. It's data-driven site portfolio management."*
+
+**Key Message**: *"This transforms site management from reactive firefighting to proactive risk mitigation through Python-powered analytics."*
 
 ---
 

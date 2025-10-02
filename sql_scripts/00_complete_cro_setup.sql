@@ -13,7 +13,7 @@ This demo has been organized into 5 focused scripts for better modularity:
 2. 🔍 02_cortex_search_setup.sql       - Document search services  
 3. 🧠 03_semantic_views_setup.sql      - Natural language query views
 4. 🤖 04_agent_setup.sql               - AI agent and custom functions
-5. 🤖 05_ml_crawl_phase_setup.sql      - ML models and predictions (Foundation phase)
+5. 🤖 05_ml_foundation_phase_setup.sql      - ML models and predictions (Foundation phase)
 
 📋 **EXECUTION OPTIONS:**
 
@@ -53,7 +53,7 @@ Run only the scripts you need for your specific demo requirements.
 !source 04_agent_setup.sql;
 
 -- Step 5: ML Foundation Phase Setup
-!source 05_ml_crawl_phase_setup.sql;
+!source 05_ml_foundation_phase_setup.sql;
 
 */
 
@@ -91,7 +91,7 @@ SELECT
 UNION ALL
 SELECT 
     '5️⃣',
-    'Run 05_ml_crawl_phase_setup.sql',
+    'Run 05_ml_foundation_phase_setup.sql',
     'Sets up ML models for enrollment prediction and site risk scoring'
 UNION ALL
 SELECT 

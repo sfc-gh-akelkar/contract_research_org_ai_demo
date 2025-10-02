@@ -125,25 +125,432 @@ CREATE OR REPLACE TABLE ML_PREDICTIONS (
 -- SAMPLE ML FEATURE DATA
 -- ========================================================================
 
--- Insert sample enrollment features
-INSERT INTO ML_ENROLLMENT_FEATURES VALUES
-(1001, 101, 201, '2024-06-01', 'Phase II', 'Oncology', 120, 7.5, 'Tier 1', 8.5, 9.0, 15, 'Medium', 50000, 1.1, 6.2, 'Stable', 12.5, TRUE, 180, 6.8),
-(1002, 101, 202, '2024-06-01', 'Phase II', 'Oncology', 120, 7.5, 'Tier 1', 12.0, 8.5, 12, 'Low', 75000, 0.9, 8.5, 'Accelerating', 8.0, TRUE, 165, 9.2),
-(1003, 102, 203, '2024-06-01', 'Phase III', 'CNS', 600, 8.8, 'Tier 2', 6.2, 7.8, 8, 'High', 30000, 1.0, 4.1, 'Declining', 18.5, FALSE, NULL, 3.8),
-(1004, 103, 204, '2024-06-01', 'Phase I/II', 'Cardiovascular', 80, 6.2, 'Tier 2', 5.8, 8.2, 10, 'Medium', 40000, 1.2, 7.8, 'Stable', 11.2, TRUE, 195, 7.5),
-(1005, 104, 205, '2024-06-01', 'Phase II', 'Oncology', 90, 7.8, 'Tier 1', 7.5, 9.1, 18, 'Low', 60000, 1.0, 5.9, 'Stable', 14.8, FALSE, NULL, 5.2);
+-- Generate comprehensive enrollment features dataset (120 records for credible ML)
+WITH base_studies AS (
+    SELECT study_id, therapeutic_area_id, study_phase, planned_enrollment, study_title
+    FROM CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.DIM_STUDIES
+),
+base_sites AS (
+    SELECT site_id, site_tier, historical_enrollment_rate, data_quality_score, country
+    FROM CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.DIM_SITES
+),
+therapeutic_mapping AS (
+    SELECT 
+        therapeutic_area_id,
+        therapeutic_area_name,
+        CASE therapeutic_area_name
+            WHEN 'Oncology' THEN 8.5
+            WHEN 'Central Nervous System' THEN 9.2
+            WHEN 'Cardiovascular' THEN 6.8
+            WHEN 'Rare Diseases' THEN 9.5
+            WHEN 'Infectious Diseases' THEN 5.2
+            ELSE 7.0
+        END as base_complexity_score
+    FROM CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.DIM_THERAPEUTIC_AREAS
+),
+expanded_combinations AS (
+    SELECT 
+        (s.study_id * 1000 + st.site_id + (seq.seq * 10000)) as feature_id,
+        s.study_id,
+        st.site_id,
+        DATEADD(month, seq.seq, '2024-01-01'::DATE) as feature_date,
+        s.study_phase,
+        tm.therapeutic_area_name as therapeutic_area,
+        s.planned_enrollment,
+        -- Study complexity with realistic variation
+        tm.base_complexity_score + (UNIFORM(1, 100, RANDOM()) / 50.0 - 1.0) as study_complexity_score,
+        st.site_tier,
+        -- Historical enrollment rate with site-specific patterns
+        st.historical_enrollment_rate * (0.8 + UNIFORM(1, 100, RANDOM()) / 250.0) as historical_enrollment_rate,
+        -- Site experience score based on tier and data quality
+        CASE st.site_tier
+            WHEN 'Tier 1' THEN 8.5 + (st.data_quality_score - 9.0) * 0.5
+            WHEN 'Tier 2' THEN 7.0 + (st.data_quality_score - 8.5) * 0.5
+            ELSE 6.0 + (st.data_quality_score - 8.0) * 0.5
+        END as site_experience_score,
+        -- Investigator experience (5-25 years, tier-dependent)
+        CASE st.site_tier
+            WHEN 'Tier 1' THEN 12 + UNIFORM(1, 100, RANDOM()) / 8
+            WHEN 'Tier 2' THEN 8 + UNIFORM(1, 100, RANDOM()) / 10
+            ELSE 5 + UNIFORM(1, 100, RANDOM()) / 12
+        END as investigator_experience_years,
+        -- Competition level based on therapeutic area and geography
+        CASE 
+            WHEN tm.therapeutic_area_name IN ('Oncology', 'Rare Diseases') AND st.country IN ('United States', 'Germany') THEN 'High'
+            WHEN tm.therapeutic_area_name = 'Central Nervous System' THEN 'Medium'
+            ELSE 'Low'
+        END as competition_level,
+        -- Patient population density (country and therapeutic area dependent)
+        CASE st.country
+            WHEN 'United States' THEN 45000 + UNIFORM(1, 100, RANDOM()) * 300
+            WHEN 'Germany' THEN 35000 + UNIFORM(1, 100, RANDOM()) * 200
+            WHEN 'United Kingdom' THEN 40000 + UNIFORM(1, 100, RANDOM()) * 250
+            WHEN 'Canada' THEN 25000 + UNIFORM(1, 100, RANDOM()) * 150
+            ELSE 20000 + UNIFORM(1, 100, RANDOM()) * 100
+        END as patient_population_density,
+        -- Seasonal factor (month-dependent)
+        CASE MONTH(DATEADD(month, seq.seq, '2024-01-01'::DATE))
+            WHEN 1 THEN 0.9  -- January: post-holiday slow
+            WHEN 2 THEN 0.95 -- February: building up
+            WHEN 3 THEN 1.1  -- March: spring enrollment peak
+            WHEN 4 THEN 1.15 -- April: peak season
+            WHEN 5 THEN 1.1  -- May: still strong
+            WHEN 6 THEN 1.0  -- June: summer start
+            WHEN 7 THEN 0.85 -- July: summer vacation
+            WHEN 8 THEN 0.8  -- August: vacation continues
+            WHEN 9 THEN 1.05 -- September: back to school/work
+            WHEN 10 THEN 1.1 -- October: fall peak
+            WHEN 11 THEN 0.95 -- November: holiday prep
+            ELSE 0.8         -- December: holidays
+        END as seasonal_factor,
+        -- Current enrollment rate (realistic variation)
+        st.historical_enrollment_rate * (0.7 + UNIFORM(1, 100, RANDOM()) / 167.0) as current_enrollment_rate,
+        -- Enrollment velocity trend
+        CASE 
+            WHEN UNIFORM(1, 100, RANDOM()) < 30 THEN 'Accelerating'
+            WHEN UNIFORM(1, 100, RANDOM()) < 70 THEN 'Stable'
+            ELSE 'Declining'
+        END as enrollment_velocity_trend,
+        -- Screen failure rate (therapeutic area dependent)
+        CASE tm.therapeutic_area_name
+            WHEN 'Oncology' THEN 15 + UNIFORM(1, 100, RANDOM()) / 10.0
+            WHEN 'Central Nervous System' THEN 20 + UNIFORM(1, 100, RANDOM()) / 8.0
+            WHEN 'Rare Diseases' THEN 25 + UNIFORM(1, 100, RANDOM()) / 6.0
+            ELSE 10 + UNIFORM(1, 100, RANDOM()) / 12.0
+        END as screen_failure_rate,
+        -- Enrollment target met (success indicator)
+        CASE WHEN UNIFORM(1, 100, RANDOM()) < 75 THEN TRUE ELSE FALSE END as enrollment_target_met,
+        -- Days to target (for successful sites)
+        CASE WHEN UNIFORM(1, 100, RANDOM()) < 75 
+             THEN 120 + UNIFORM(1, 100, RANDOM()) * 1.5
+             ELSE NULL 
+        END as days_to_target,
+        seq.seq as record_sequence
+    FROM base_studies s
+    CROSS JOIN base_sites st
+    CROSS JOIN therapeutic_mapping tm
+    CROSS JOIN (SELECT ROW_NUMBER() OVER (ORDER BY SEQ4()) - 1 as seq FROM TABLE(GENERATOR(ROWCOUNT => 5))) seq
+    WHERE s.therapeutic_area_id = tm.therapeutic_area_id
+),
+final_enrollment_features AS (
+    SELECT 
+        feature_id,
+        study_id,
+        site_id,
+        feature_date,
+        study_phase,
+        therapeutic_area,
+        planned_enrollment,
+        study_complexity_score,
+        site_tier,
+        historical_enrollment_rate,
+        site_experience_score,
+        investigator_experience_years,
+        competition_level,
+        patient_population_density,
+        seasonal_factor,
+        current_enrollment_rate,
+        enrollment_velocity_trend,
+        screen_failure_rate,
+        enrollment_target_met,
+        days_to_target,
+        -- Calculate final enrollment rate based on multiple factors
+        GREATEST(1.0, 
+            historical_enrollment_rate * 
+            seasonal_factor * 
+            (CASE competition_level WHEN 'High' THEN 0.8 WHEN 'Medium' THEN 0.9 ELSE 1.0 END) *
+            (site_experience_score / 10.0) *
+            (1.0 - screen_failure_rate / 100.0) *
+            (CASE site_tier WHEN 'Tier 1' THEN 1.1 WHEN 'Tier 2' THEN 1.0 ELSE 0.9 END) +
+            (UNIFORM(1, 100, RANDOM()) / 100.0 - 0.5) -- Add some noise
+        ) as final_enrollment_rate
+    FROM expanded_combinations
+)
+INSERT INTO ML_ENROLLMENT_FEATURES 
+SELECT * FROM final_enrollment_features;
 
--- Insert sample site performance features
-INSERT INTO ML_SITE_PERFORMANCE_FEATURES VALUES
-(2001, 201, '2024-06-01', 'Tier 1', 9.2, 365, 4, 8.5, 9.2, 9.0, 95.5, 112.5, 98.2, 2.8, 2.5, FALSE, 0, 0, 'Low', FALSE),
-(2002, 202, '2024-06-01', 'Tier 1', 8.8, 545, 3, 12.0, 8.8, 9.1, 88.9, 95.8, 96.5, 3.2, 3.1, FALSE, 1, 0, 'Low', FALSE),
-(2003, 203, '2024-06-01', 'Tier 2', 7.5, 485, 2, 6.2, 8.5, 8.7, 78.2, 68.5, 85.4, 4.1, 4.8, TRUE, 2, 1, 'High', TRUE),
-(2004, 204, '2024-06-01', 'Tier 2', 8.9, 425, 2, 5.8, 8.9, 8.8, 82.1, 89.2, 91.8, 3.5, 3.9, FALSE, 0, 0, 'Medium', FALSE),
-(2005, 205, '2024-06-01', 'Tier 1', 9.0, 395, 3, 7.5, 9.0, 9.2, 91.2, 78.9, 89.5, 3.8, 4.2, FALSE, 1, 0, 'Medium', FALSE);
+-- Generate comprehensive site performance features dataset (100 records for credible ML)
+WITH base_sites_extended AS (
+    SELECT 
+        s.site_id,
+        s.site_tier,
+        s.historical_enrollment_rate,
+        s.data_quality_score,
+        s.regulatory_compliance_score,
+        s.country,
+        s.therapeutic_expertise,
+        -- Add clustering-ready features
+        s.enrollment_capacity,
+        s.active_studies_count
+    FROM CRO_AI_DEMO.CLINICAL_OPERATIONS_SCHEMA.DIM_SITES s
+),
+time_periods AS (
+    SELECT 
+        DATEADD(month, seq, '2024-01-01'::DATE) as evaluation_date,
+        seq as time_offset
+    FROM (SELECT ROW_NUMBER() OVER (ORDER BY SEQ4()) - 1 as seq FROM TABLE(GENERATOR(ROWCOUNT => 20)))
+),
+expanded_site_performance AS (
+    SELECT 
+        (s.site_id * 1000 + t.time_offset * 100 + UNIFORM(1, 100, RANDOM())) as feature_id,
+        s.site_id,
+        t.evaluation_date,
+        s.site_tier,
+        -- Therapeutic expertise match (varies by time as studies change)
+        GREATEST(5.0, LEAST(10.0, 
+            CASE s.site_tier
+                WHEN 'Tier 1' THEN 8.5 + (UNIFORM(1, 100, RANDOM()) / 50.0 - 1.0)
+                WHEN 'Tier 2' THEN 7.5 + (UNIFORM(1, 100, RANDOM()) / 50.0 - 1.0)
+                ELSE 6.5 + (UNIFORM(1, 100, RANDOM()) / 50.0 - 1.0)
+            END
+        )) as therapeutic_expertise_match,
+        -- GCP certification days since (increases over time)
+        GREATEST(30, 365 + t.time_offset * 30 + UNIFORM(1, 100, RANDOM()) * 5) as gcp_certification_days_since,
+        -- Active studies load (varies by site capacity)
+        GREATEST(1, LEAST(s.enrollment_capacity / 5, 
+            s.active_studies_count + UNIFORM(1, 100, RANDOM()) / 50 - 1
+        )) as active_studies_load,
+        -- Historical performance metrics with time-based variation
+        s.historical_enrollment_rate * (0.9 + UNIFORM(1, 100, RANDOM()) / 500.0) as historical_enrollment_rate,
+        s.data_quality_score + (UNIFORM(1, 100, RANDOM()) / 100.0 - 0.5) as historical_data_quality_avg,
+        s.regulatory_compliance_score + (UNIFORM(1, 100, RANDOM()) / 100.0 - 0.5) as historical_compliance_avg,
+        -- Previous study completion rate (tier-dependent)
+        CASE s.site_tier
+            WHEN 'Tier 1' THEN 85 + UNIFORM(1, 100, RANDOM()) / 10.0
+            WHEN 'Tier 2' THEN 75 + UNIFORM(1, 100, RANDOM()) / 8.0
+            ELSE 65 + UNIFORM(1, 100, RANDOM()) / 6.0
+        END as previous_study_completion_rate,
+        -- Current performance indicators
+        GREATEST(50.0, LEAST(120.0,
+            100 + (s.data_quality_score - 8.5) * 10 + (UNIFORM(1, 100, RANDOM()) / 10.0 - 5.0)
+        )) as current_enrollment_vs_target,
+        -- Query resolution rate (data quality dependent)
+        GREATEST(60.0, LEAST(100.0,
+            s.data_quality_score * 10 + (UNIFORM(1, 100, RANDOM()) / 10.0 - 5.0)
+        )) as query_resolution_rate,
+        -- Protocol deviation rate (compliance dependent)
+        GREATEST(0.5, LEAST(15.0,
+            (10.0 - s.regulatory_compliance_score) * 1.5 + (UNIFORM(1, 100, RANDOM()) / 20.0)
+        )) as protocol_deviation_rate,
+        -- Monitoring visit frequency (tier and performance dependent)
+        CASE s.site_tier
+            WHEN 'Tier 1' THEN 2.5 + UNIFORM(1, 100, RANDOM()) / 100.0
+            WHEN 'Tier 2' THEN 3.0 + UNIFORM(1, 100, RANDOM()) / 80.0
+            ELSE 3.5 + UNIFORM(1, 100, RANDOM()) / 60.0
+        END as monitoring_visit_frequency,
+        -- Risk factors
+        CASE WHEN UNIFORM(1, 100, RANDOM()) < 15 THEN TRUE ELSE FALSE END as staff_turnover_indicator,
+        -- Regulatory issues (tier-dependent probability)
+        CASE 
+            WHEN s.site_tier = 'Tier 1' AND UNIFORM(1, 100, RANDOM()) < 5 THEN 1
+            WHEN s.site_tier = 'Tier 2' AND UNIFORM(1, 100, RANDOM()) < 10 THEN UNIFORM(1, 3, RANDOM())
+            WHEN UNIFORM(1, 100, RANDOM()) < 20 THEN UNIFORM(1, 4, RANDOM())
+            ELSE 0
+        END as regulatory_issues_count,
+        -- Sponsor escalations (performance dependent)
+        CASE 
+            WHEN s.data_quality_score > 9.0 AND UNIFORM(1, 100, RANDOM()) < 5 THEN 0
+            WHEN s.data_quality_score > 8.5 AND UNIFORM(1, 100, RANDOM()) < 15 THEN UNIFORM(0, 1, RANDOM())
+            WHEN UNIFORM(1, 100, RANDOM()) < 25 THEN UNIFORM(0, 3, RANDOM())
+            ELSE 0
+        END as sponsor_escalations_count,
+        t.time_offset
+    FROM base_sites_extended s
+    CROSS JOIN time_periods t
+),
+final_site_features AS (
+    SELECT 
+        feature_id,
+        site_id,
+        evaluation_date,
+        site_tier,
+        therapeutic_expertise_match,
+        gcp_certification_days_since,
+        active_studies_load,
+        historical_enrollment_rate,
+        historical_data_quality_avg,
+        historical_compliance_avg,
+        previous_study_completion_rate,
+        current_enrollment_vs_target,
+        query_resolution_rate,
+        protocol_deviation_rate,
+        monitoring_visit_frequency,
+        staff_turnover_indicator,
+        regulatory_issues_count,
+        sponsor_escalations_count,
+        -- Determine site risk level based on multiple factors
+        CASE 
+            WHEN (protocol_deviation_rate > 8.0 OR regulatory_issues_count > 2 OR 
+                  query_resolution_rate < 75.0 OR staff_turnover_indicator = TRUE) THEN 'High'
+            WHEN (protocol_deviation_rate > 5.0 OR regulatory_issues_count > 0 OR 
+                  query_resolution_rate < 85.0 OR current_enrollment_vs_target < 80.0) THEN 'Medium'
+            ELSE 'Low'
+        END as site_risk_level,
+        -- Underperformance indicator (target variable for ML)
+        CASE 
+            WHEN (current_enrollment_vs_target < 75.0 OR protocol_deviation_rate > 10.0 OR 
+                  query_resolution_rate < 70.0 OR regulatory_issues_count > 3) THEN TRUE
+            ELSE FALSE
+        END as underperformance_indicator
+    FROM expanded_site_performance
+)
+INSERT INTO ML_SITE_PERFORMANCE_FEATURES 
+SELECT * FROM final_site_features;
 
 -- ========================================================================
--- ML PROCEDURES - CRAWL PHASE
+-- ML PROCEDURES - Foundation PHASE
 -- ========================================================================
+
+-- Python-SQL Integration Stored Procedure
+-- This procedure demonstrates how Python ML models can be deployed as SQL functions
+CREATE OR REPLACE PROCEDURE DEPLOY_PYTHON_ML_PREDICTIONS()
+RETURNS STRING
+LANGUAGE PYTHON
+RUNTIME_VERSION = '3.9'
+PACKAGES = ('snowflake-snowpark-python', 'pandas', 'numpy', 'scikit-learn')
+HANDLER = 'deploy_ml_predictions'
+COMMENT = 'Deploy Python Random Forest predictions to SQL tables for business user access'
+AS
+$$
+import pandas as pd
+import numpy as np
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from datetime import datetime
+import json
+
+def deploy_ml_predictions(session):
+    """
+    Deploy Python ML model predictions to SQL infrastructure
+    This bridges Python development with SQL production deployment
+    """
+    
+    try:
+        # Load training data from Snowflake tables
+        enrollment_df = session.table("CRO_AI_DEMO.ML_MODELS.ML_ENROLLMENT_FEATURES").to_pandas()
+        site_performance_df = session.table("CRO_AI_DEMO.ML_MODELS.ML_SITE_PERFORMANCE_FEATURES").to_pandas()
+        
+        # Feature engineering for enrollment prediction
+        enrollment_features = [
+            'study_complexity_score', 'historical_enrollment_rate', 'site_experience_score',
+            'investigator_experience_years', 'patient_population_density', 'seasonal_factor',
+            'screen_failure_rate'
+        ]
+        
+        # Prepare enrollment data
+        enrollment_ml_df = enrollment_df[enrollment_df['final_enrollment_rate'].notna()].copy()
+        
+        # Encode categorical variables
+        le_competition = LabelEncoder()
+        le_site_tier = LabelEncoder()
+        le_therapeutic = LabelEncoder()
+        
+        enrollment_ml_df['competition_level_encoded'] = le_competition.fit_transform(enrollment_ml_df['competition_level'])
+        enrollment_ml_df['site_tier_encoded'] = le_site_tier.fit_transform(enrollment_ml_df['site_tier'])
+        enrollment_ml_df['therapeutic_area_encoded'] = le_therapeutic.fit_transform(enrollment_ml_df['therapeutic_area'])
+        
+        enrollment_features.extend(['competition_level_encoded', 'site_tier_encoded', 'therapeutic_area_encoded'])
+        
+        # Prepare feature matrix and target
+        X_enrollment = enrollment_ml_df[enrollment_features]
+        y_enrollment = enrollment_ml_df['final_enrollment_rate']
+        
+        # Train Random Forest Enrollment Model
+        rf_enrollment = RandomForestRegressor(
+            n_estimators=100, max_depth=10, min_samples_split=5,
+            min_samples_leaf=2, random_state=42, n_jobs=-1
+        )
+        rf_enrollment.fit(X_enrollment, y_enrollment)
+        
+        # Generate predictions
+        enrollment_predictions = rf_enrollment.predict(X_enrollment)
+        
+        # Create prediction results for SQL deployment
+        prediction_results = []
+        for i, (idx, row) in enumerate(enrollment_ml_df.iterrows()):
+            prediction_results.append({
+                'prediction_id': 10000 + i,
+                'model_id': 'rf_enrollment_python_v1',
+                'prediction_date': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'entity_type': 'study_site',
+                'entity_id': int(row['study_id']),
+                'site_id': int(row['site_id']),
+                'prediction_value': float(enrollment_predictions[i]),
+                'prediction_category': 'High Performance Expected' if enrollment_predictions[i] > 8 
+                                    else 'On Track' if enrollment_predictions[i] > 5 
+                                    else 'At Risk',
+                'confidence_score': 0.85,
+                'business_impact': f"Predicted enrollment: {enrollment_predictions[i]:.1f} subjects/week"
+            })
+        
+        # Convert to DataFrame and save to Snowflake
+        predictions_df = pd.DataFrame(prediction_results)
+        
+        # Clear existing predictions and insert new ones
+        session.sql("DELETE FROM CRO_AI_DEMO.ML_MODELS.ML_PREDICTIONS WHERE model_id = 'rf_enrollment_python_v1'").collect()
+        
+        # Write predictions back to Snowflake
+        session.write_pandas(
+            predictions_df, 
+            table_name="ML_PREDICTIONS",
+            database="CRO_AI_DEMO",
+            schema="ML_MODELS",
+            auto_create_table=False,
+            overwrite=False
+        )
+        
+        # Update model registry
+        model_registry_data = {
+            'model_id': 'rf_enrollment_python_v1',
+            'model_name': 'Python Random Forest Enrollment Predictor',
+            'model_type': 'enrollment_prediction',
+            'model_version': 'v1.0',
+            'training_date': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'model_status': 'Active',
+            'performance_metrics': json.dumps({
+                'training_samples': len(X_enrollment),
+                'features_count': len(enrollment_features),
+                'model_type': 'RandomForestRegressor'
+            }),
+            'comments': 'Python-developed Random Forest with clinical domain features - deployed via Snowpark'
+        }
+        
+        # Insert model registry entry
+        session.sql(f"""
+            MERGE INTO CRO_AI_DEMO.ML_MODELS.ML_MODEL_REGISTRY AS target
+            USING (SELECT 
+                '{model_registry_data['model_id']}' as model_id,
+                '{model_registry_data['model_name']}' as model_name,
+                '{model_registry_data['model_type']}' as model_type,
+                '{model_registry_data['model_version']}' as model_version,
+                '{model_registry_data['training_date']}'::timestamp as training_date,
+                '{model_registry_data['model_status']}' as model_status,
+                '{model_registry_data['performance_metrics']}' as performance_metrics,
+                '{model_registry_data['comments']}' as comments
+            ) AS source
+            ON target.model_id = source.model_id
+            WHEN MATCHED THEN UPDATE SET
+                model_name = source.model_name,
+                model_version = source.model_version,
+                training_date = source.training_date,
+                model_status = source.model_status,
+                performance_metrics = source.performance_metrics,
+                comments = source.comments
+            WHEN NOT MATCHED THEN INSERT VALUES (
+                source.model_id, source.model_name, source.model_type, source.model_version,
+                source.training_date, source.model_status, source.performance_metrics, source.comments
+            )
+        """).collect()
+        
+        return f"✅ Successfully deployed {len(prediction_results)} Python ML predictions to SQL infrastructure. Model: rf_enrollment_python_v1"
+        
+    except Exception as e:
+        return f"❌ Error deploying Python ML predictions: {str(e)}"
+$$;
+
+-- Call the Python ML deployment procedure
+-- This demonstrates the "Python development → SQL deployment" workflow
+CALL DEPLOY_PYTHON_ML_PREDICTIONS();
 
 -- Procedure 1: Enrollment Prediction Model (Simple Linear Regression)
 CREATE OR REPLACE PROCEDURE TRAIN_ENROLLMENT_PREDICTION_MODEL()

@@ -45,7 +45,7 @@
 
 ---
 
-## **🐾 CRAWL PHASE (Minutes 2-4): Quick Wins & Foundation**
+## **🏗️ FOUNDATION PHASE (Minutes 2-4): Quick Wins & Core Capabilities**
 *"Let's start with some quick operational snapshots to establish our baseline..."*
 
 #### **Live Demo - Query 1: Portfolio Overview** ⚡ *~30 seconds*
@@ -75,7 +75,7 @@
 
 ---
 
-## **🚶 WALK PHASE (Minutes 4-6): Building Analytical Momentum**
+## **🚀 ADVANCED PHASE (Minutes 4-6): Building Analytical Momentum**
 *"Now that we understand our portfolio, let's dive into performance metrics..."*
 
 #### **Live Demo - Query 4: Site Performance Analytics** 📊 *~1 minute*
@@ -107,7 +107,7 @@
 
 ---
 
-## **🏃 RUN PHASE (Minutes 6-8): Advanced Analytics & Integration**
+## **🎯 STRATEGIC PHASE (Minutes 6-8): Advanced Analytics & Integration**
 *"Now watch as we combine everything for sophisticated business intelligence..."*
 
 #### **Live Demo - Query 7: Integrated Performance Analysis** 🚀 *~2 minutes*
@@ -128,20 +128,20 @@
 - "Single conversation yields comprehensive risk assessment"
 - "This level of insight normally requires specialized teams"
 
-### **The Crawl-Walk-Run Story Arc Complete:**
+### **The Foundation-Advanced-Strategic Story Arc Complete:**
 "In just 8 progressive questions, Dr. Torres built comprehensive operational intelligence:
 
-**🐾 CRAWL - Quick Foundations (30 seconds each):**
+**🏗️ FOUNDATION - Quick Foundations (30 seconds each):**
 1. **📊 Portfolio Count:** Active studies baseline
 2. **👥 Enrollment Total:** Year-to-date performance
 3. **🧪 Therapeutic Focus:** Top areas of expertise
 
-**🚶 WALK - Analytical Depth (1 minute each):**
+**🚀 ADVANCED - Analytical Depth (1 minute each):**
 4. **⚖️ Performance Comparison:** Therapeutic area effectiveness
 5. **💼 Sponsor Intelligence:** Revenue concentration analysis
 6. **📚 Document Discovery:** SOP access and search
 
-**🏃 RUN - Advanced Integration (2 minutes each):**
+**🎯 STRATEGIC - Advanced Integration (2 minutes each):**
 7. **🔗 Integrated Analysis:** SOPs + performance metrics combined
 8. **🔮 Predictive Intelligence:** Timeline risk assessment
 
@@ -152,11 +152,11 @@ What would normally take a week of coordination - now complete in one intelligen
 ## **⏱️ Minutes 8-12: The Bigger Picture - CRO Transformation**
 
 ### **From Questions to Business Intelligence:**
-"What you just witnessed isn't just impressive AI - it's a fundamental shift in how CROs can compete and win. Let me show you how this same crawl-walk-run approach scales to executive-level strategy."
+"What you just witnessed isn't just impressive AI - it's a fundamental shift in how CROs can compete and win. Let me show you how this same Foundation-Advanced-Strategic approach scales to executive-level strategy."
 
 ### **🎯 Executive Intelligence - Continuing the Progressive Approach**
 
-#### **WALK Level - Strategic Dashboards** 📊 *~1.5 minutes*
+#### **ADVANCED Level - Strategic Dashboards** 📊 *~1.5 minutes*
 **Narrative:** *"Dr. Torres now has his operational foundation. Let's see how this scales for the executive team..."*
 
 **Type:** *"Show me our Q1 enrollment performance across all therapeutic areas"*
@@ -167,7 +167,7 @@ What would normally take a week of coordination - now complete in one intelligen
 - "Notice how it connects back to our earlier therapeutic area analysis"
 - "Operational data becomes executive intelligence"
 
-#### **RUN Level - Market Intelligence** 🚀 *~2.5 minutes*
+#### **STRATEGIC Level - Market Intelligence** 🚀 *~2.5 minutes*
 **Narrative:** *"The CEO asks: 'How do we compare to our competition in oncology?'"*
 
 **Type:** *"Analyze our oncology performance and identify our competitive advantages for sponsor presentations"*
@@ -178,7 +178,7 @@ What would normally take a week of coordination - now complete in one intelligen
 - "AI reasoning based on therapeutic area expertise"
 - "This is where clinical data becomes market intelligence"
 
-#### **ADVANCED RUN - Growth Strategy** 🚀 *~3 minutes*
+#### **ADVANCED STRATEGIC - Growth Strategy** 🚀 *~3 minutes*
 **Narrative:** *"The ultimate question: 'Where should we focus our growth investments?'"*
 
 **Type:** *"Based on our performance data and sponsor relationships, recommend our top 3 business development priorities"*
@@ -249,10 +249,10 @@ What would normally take a week of coordination - now complete in one intelligen
 
 ## 🎯 **Key Demo Success Metrics:**
 
-### **📈 Crawl-Walk-Run Execution:**
-- ✅ **CRAWL Success** - Immediate confidence building (3 quick wins in 2 minutes)
-- ✅ **WALK Success** - Analytical momentum (3 meaningful insights in 2 minutes)  
-- ✅ **RUN Success** - Strategic wow moments (2 complex analyses in 2 minutes)
+### **📈 Foundation-Advanced-Strategic Execution:**
+- ✅ **FOUNDATION Success** - Immediate confidence building (3 quick wins in 2 minutes)
+- ✅ **ADVANCED Success** - Analytical momentum (3 meaningful insights in 2 minutes)  
+- ✅ **STRATEGIC Success** - Strategic wow moments (2 complex analyses in 2 minutes)
 
 ### **🎪 Audience Engagement:**
 - ✅ **Early buy-in** from quick operational wins
@@ -268,18 +268,18 @@ What would normally take a week of coordination - now complete in one intelligen
 
 ## 📋 **Demo Timing Cheat Sheet:**
 
-**🐾 CRAWL (2 minutes total):** 
+**🏗️ FOUNDATION (2 minutes total):** 
 - 3 questions × 30-45 seconds each
 - Focus: Speed, confidence, foundation
 
-**🚶 WALK (2 minutes total):**
+**🚀 ADVANCED (2 minutes total):**
 - 3 questions × 1 minute each  
 - Focus: Analytical depth, business relevance
 
-**🏃 RUN (4 minutes total):**
+**🎯 STRATEGIC (4 minutes total):**
 - 2 operational + 3 strategic questions × 2-3 minutes each
 - Focus: Integration, prediction, strategy
 
-**🎯 Pro Tip:** If any RUN question takes >3 minutes, have a simpler backup ready!
+**🎯 Pro Tip:** If any STRATEGIC question takes >3 minutes, have a simpler backup ready!
 
 **Remember:** You're not just showing features - you're demonstrating a progressive methodology that transforms CRO operations from basic reporting to strategic intelligence!
